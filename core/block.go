@@ -1,9 +1,9 @@
 package core
 
 type Block struct {
-	timestamp     int64
-	nonce         uint64
-	prevBlockHash []byte
-	hash          []byte
-	transactions  []*Transaction
+	Timestamp     int64
+	Nonce         uint64
+	PrevBlockHash []byte
+	Hash          []byte
+	Transactions  []*Transaction
 }

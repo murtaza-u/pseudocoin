@@ -1,6 +1,6 @@
 package core
 
 type TXOutput struct {
-	value      uint
-	pubkeyHash []byte
+	Value      uint
+	PubkeyHash []byte
 }

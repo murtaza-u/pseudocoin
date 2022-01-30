@@ -1,7 +1,7 @@
 package core
 
 type Transaction struct {
-	id      []byte
-	inputs  []TXInput
-	outputs []TXOutput
+	ID      []byte
+	Inputs  []TXInput
+	Outputs []TXOutput
 }
