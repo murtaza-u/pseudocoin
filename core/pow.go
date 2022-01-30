@@ -63,3 +63,10 @@ func (pow *PoW) Run() ([]byte, uint64) {
 
 	return hash[:], nonce
 }
+
+func (pow *PoW) validate() bool {
+	var hashInt big.Int
+	hash := sha256.Sum256(pow.prepareData(pow.Block.Nonce))
+	hashInt.SetBytes(hash[:])
+	return hashInt.Cmp(pow.Target) == -1
+}
