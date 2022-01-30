@@ -3,7 +3,6 @@ package core
 import (
 	"bytes"
 	"crypto/sha256"
-	"log"
 	"math"
 	"math/big"
 	"time"
@@ -25,16 +24,12 @@ func NewPoW(b *Block) *PoW {
 	return &PoW{b, target}
 }
 
-func (pow *PoW) prepareData(nonce uint64) []byte {
+func (pow *PoW) PrepareData(nonce uint64) ([]byte, error) {
 	var targetBytes, nonceBytes, timeBytes []byte
 
 	targetBytes, err := IntToBytes(targetBits)
 	nonceBytes, err = IntToBytes(int64(nonce))
 	timeBytes, err = IntToBytes(time.Now().Unix())
-
-	if err != nil {
-		log.Panic(err)
-	}
 
 	return bytes.Join([][]byte{
 		targetBytes,
@@ -42,16 +37,23 @@ func (pow *PoW) prepareData(nonce uint64) []byte {
 		timeBytes,
 		// pow.block.prevBlockHash,
 		// pow.block.hashTXs(),
-	}, []byte{})
+	}, []byte{}), err
 }
 
-func (pow *PoW) Run() ([]byte, uint64) {
+func (pow *PoW) Run() ([]byte, uint64, error) {
+	var err error
 	var hash [32]byte
 	var hashInt big.Int
 	var nonce uint64
 
 	for nonce < maxNonce {
-		hash = sha256.Sum256(pow.prepareData(nonce))
+		var data []byte
+		data, err = pow.PrepareData(nonce)
+		if err != nil {
+			break
+		}
+
+		hash = sha256.Sum256(data)
 		hashInt.SetBytes(hash[:])
 
 		if hashInt.Cmp(pow.Target) == -1 {
@@ -61,12 +63,17 @@ func (pow *PoW) Run() ([]byte, uint64) {
 		nonce++
 	}
 
-	return hash[:], nonce
+	return hash[:], nonce, err
 }
 
-func (pow *PoW) validate() bool {
+func (pow *PoW) Validate() (bool, error) {
 	var hashInt big.Int
-	hash := sha256.Sum256(pow.prepareData(pow.Block.Nonce))
+	data, err := pow.PrepareData(pow.Block.Nonce)
+	if err != nil {
+		return false, err
+	}
+
+	hash := sha256.Sum256(data)
 	hashInt.SetBytes(hash[:])
-	return hashInt.Cmp(pow.Target) == -1
+	return hashInt.Cmp(pow.Target) == -1, nil
 }
