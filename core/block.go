@@ -3,7 +3,6 @@ package core
 import (
 	"bytes"
 	"encoding/gob"
-	"log"
 )
 
 type Block struct {
@@ -14,20 +13,16 @@ type Block struct {
 	Transactions  []*Transaction
 }
 
-func (b Block) serialize() []byte {
+func (b Block) Serialize() ([]byte, error) {
 	var buff bytes.Buffer
 	encoder := gob.NewEncoder(&buff)
-	if err := encoder.Encode(b); err != nil {
-		log.Panic(err)
-	}
-	return buff.Bytes()
+	err := encoder.Encode(b)
+	return buff.Bytes(), err
 }
 
-func deserializeBlock(encData []byte) Block {
+func DeserializeBlock(encData []byte) (Block, error) {
 	block := Block{}
 	decoder := gob.NewDecoder(bytes.NewReader(encData))
-	if err := decoder.Decode(&block); err != nil {
-		log.Panic(err)
-	}
-	return block
+	err := decoder.Decode(&block)
+	return block, err
 }
