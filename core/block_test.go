@@ -8,12 +8,12 @@ import (
 )
 
 func TestSerializeDeserialize(t *testing.T) {
-	b := core.Block {
-		Timestamp: time.Now().Unix(),
-		Nonce: 10,
+	b := core.Block{
+		Timestamp:     time.Now().Unix(),
+		Nonce:         10,
 		PrevBlockHash: []byte{},
-		Hash: []byte{},
-		Transactions: []*core.Transaction{},
+		Hash:          []byte{},
+		Transactions:  []*core.Transaction{},
 	}
 
 	result, err := b.Serialize()

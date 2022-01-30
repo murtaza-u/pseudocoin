@@ -6,7 +6,6 @@ import (
 	"github.com/murtaza-udaipurwala/core/core"
 )
 
-
 var pow = core.NewPoW(&core.Block{})
 var hash []byte
 var nonce uint64
