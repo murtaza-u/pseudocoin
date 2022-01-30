@@ -40,8 +40,8 @@ func (pow *PoW) prepareData(nonce uint64) []byte {
 		targetBytes,
 		nonceBytes,
 		timeBytes,
-		pow.block.prevBlockHash,
-		pow.block.hashTXs(),
+		// pow.block.prevBlockHash,
+		// pow.block.hashTXs(),
 	}, []byte{})
 }
 
