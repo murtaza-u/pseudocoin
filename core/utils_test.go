@@ -7,8 +7,12 @@ import (
 )
 
 func TestIntToBytes(t *testing.T) {
-	_, err := core.IntToBytes(10)
+	result, err := core.IntToBytes(10)
 	if err != nil {
 		t.Error(err)
+	}
+
+	if len(result) == 0 {
+		t.Errorf("Invalid result\n")
 	}
 }
