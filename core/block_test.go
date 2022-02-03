@@ -32,11 +32,11 @@ func TestSerializeDeserialize(t *testing.T) {
 }
 
 func TestHashTXs(t *testing.T) {
-	tx1 := core.Transaction{ID: []byte("1")}
-	tx2 := core.Transaction{ID: []byte("2")}
-	tx3 := core.Transaction{ID: []byte("3")}
-
-	b := core.Block{Transactions: []*core.Transaction{&tx1, &tx2, &tx3}}
+	b := core.Block{Transactions: []*core.Transaction{
+		{ID: []byte("1")},
+		{ID: []byte("2")},
+		{ID: []byte("3")},
+	}}
 
 	hash, err := b.HashTXs()
 	if err != nil {

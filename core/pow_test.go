@@ -2,11 +2,20 @@ package core_test
 
 import (
 	"testing"
+	"time"
 
 	"github.com/murtaza-udaipurwala/core/core"
 )
 
-var pow = core.NewPoW(&core.Block{})
+var pow = core.NewPoW(&core.Block{
+	Timestamp:     time.Now().Unix(),
+	PrevBlockHash: []byte("0"),
+	Transactions: []*core.Transaction{
+		{ID: []byte("1")},
+		{ID: []byte("2")},
+		{ID: []byte("3")},
+	},
+})
 var hash []byte
 var nonce uint64
 
