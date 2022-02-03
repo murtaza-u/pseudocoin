@@ -30,3 +30,18 @@ func TestSerializeDeserialize(t *testing.T) {
 		t.Errorf("Block deserialization failed")
 	}
 }
+
+func TestHashTXs(t *testing.T) {
+	tx1 := core.Transaction{ID: []byte("1")}
+	tx2 := core.Transaction{ID: []byte("2")}
+	tx3 := core.Transaction{ID: []byte("3")}
+
+	b := core.Block{Transactions: []*core.Transaction{&tx1, &tx2, &tx3}}
+
+	hash, err := b.HashTXs()
+	if err != nil {
+		t.Error(err)
+	}
+
+	t.Logf("Hash: %s", hash)
+}
