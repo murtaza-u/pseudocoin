@@ -30,13 +30,21 @@ func (pow *PoW) PrepareData(nonce uint64) ([]byte, error) {
 	targetBytes, err := IntToBytes(targetBits)
 	nonceBytes, err = IntToBytes(int64(nonce))
 	timeBytes, err = IntToBytes(time.Now().Unix())
+	if err != nil {
+		return nil, err
+	}
+
+	hashedTXs, err := pow.Block.HashTXs()
+	if err != nil {
+		return nil, err
+	}
 
 	return bytes.Join([][]byte{
 		targetBytes,
 		nonceBytes,
 		timeBytes,
-		// pow.block.prevBlockHash,
-		// pow.block.hashTXs(),
+		pow.Block.PrevBlockHash,
+		hashedTXs,
 	}, []byte{}), err
 }
 
