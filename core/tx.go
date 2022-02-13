@@ -73,3 +73,7 @@ func NewCBTX(address, data string) (Transaction, error) {
 	tx.ID = txHash
 	return tx, nil
 }
+
+func (tx Transaction) IsCoinbase() bool {
+	return len(tx.Inputs) == 1 && len(tx.Inputs[0].TxID) == 0 && tx.Inputs[0].Out == -1
+}
