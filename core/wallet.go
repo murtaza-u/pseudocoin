@@ -73,7 +73,7 @@ func (w Wallet) GetAddress() (string, error) {
 	}
 
 	versionPayload := append([]byte{version}, pubKeyHash...)
-	checksum := Checksum(pubKeyHash)
+	checksum := Checksum(versionPayload)
 	fullPayload := append(versionPayload, checksum...)
 
 	return base58.Encode(fullPayload), nil
