@@ -6,6 +6,7 @@ import (
 	"crypto/rand"
 	"crypto/sha256"
 
+	"github.com/mr-tron/base58"
 	"golang.org/x/crypto/ripemd160"
 )
 
@@ -14,7 +15,10 @@ type Wallet struct {
 	PubKey  []byte
 }
 
-const addressChecksumLen = 4
+const (
+	addressChecksumLen = 4
+	version            = byte(0x00)
+)
 
 func newKeyPair() (ecdsa.PrivateKey, []byte, error) {
 	curve := elliptic.P256()
@@ -60,4 +64,17 @@ func Checksum(pubKeyHash []byte) []byte {
 
 	// checksum is only first 4 bytes of the resulting hash
 	return secondSHA256[:addressChecksumLen]
+}
+
+func (w Wallet) GetAddress() (string, error) {
+	pubKeyHash, err := HashPubKey(w.PubKey)
+	if err != nil {
+		return "", err
+	}
+
+	versionPayload := append([]byte{version}, pubKeyHash...)
+	checksum := Checksum(pubKeyHash)
+	fullPayload := append(versionPayload, checksum...)
+
+	return base58.Encode(fullPayload), nil
 }
