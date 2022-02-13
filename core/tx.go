@@ -3,12 +3,14 @@ package core
 import (
 	"bytes"
 	"crypto/ecdsa"
+	"crypto/elliptic"
 	"crypto/rand"
 	"crypto/sha256"
 	"encoding/gob"
 	"encoding/hex"
 	"errors"
 	"fmt"
+	"math/big"
 )
 
 type Transaction struct {
@@ -99,13 +101,13 @@ func (tx Transaction) TrimmedCopy() Transaction {
 	}
 
 	return Transaction{
-		ID:      nil,
+		ID:      tx.ID,
 		Inputs:  inputs,
 		Outputs: outputs,
 	}
 }
 
-func (tx Transaction) Sign(privKey ecdsa.PrivateKey, prevTXs map[string]Transaction) error {
+func (tx *Transaction) Sign(privKey ecdsa.PrivateKey, prevTXs map[string]Transaction) error {
 	if tx.IsCoinbase() {
 		return nil
 	}
@@ -142,4 +144,52 @@ func (tx Transaction) Sign(privKey ecdsa.PrivateKey, prevTXs map[string]Transact
 	}
 
 	return nil
+}
+
+func (tx *Transaction) Verify(prevTXs map[string]Transaction) (bool, error) {
+	if tx.IsCoinbase() {
+		return true, nil
+	}
+
+	for _, in := range tx.Inputs {
+		if prevTXs[hex.EncodeToString(in.TxID)].ID == nil {
+			return false, errors.New("Previous transactions are invalid")
+		}
+	}
+
+	txCopy := tx.TrimmedCopy()
+	curve := elliptic.P256()
+
+	for idx, in := range tx.Inputs {
+		prevTX := prevTXs[hex.EncodeToString(in.TxID)]
+
+		txCopy.Inputs[idx].Signature = nil // just incase.....
+		txCopy.Inputs[idx].PublicKey = prevTX.Outputs[in.Out].PubkeyHash
+
+		r := big.Int{}
+		s := big.Int{}
+		sigLen := len(in.Signature)
+		r.SetBytes(in.Signature[:(sigLen / 2)])
+		s.SetBytes(in.Signature[(sigLen / 2):])
+
+		x := big.Int{}
+		y := big.Int{}
+		keyLen := len(in.PublicKey)
+		x.SetBytes(in.PublicKey[:(keyLen / 2)])
+		y.SetBytes(in.PublicKey[(keyLen / 2):])
+
+		rawPubKey := ecdsa.PublicKey{
+			Curve: curve,
+			X:     &x,
+			Y:     &y,
+		}
+
+		if !ecdsa.Verify(&rawPubKey, tx.ID, &r, &s) {
+			return false, nil
+		}
+
+		txCopy.Inputs[idx].PublicKey = nil
+	}
+
+	return true, nil
 }
