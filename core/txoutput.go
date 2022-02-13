@@ -27,3 +27,14 @@ func (out *TXOutput) Lock(address string) error {
 func (out TXOutput) IsLockedWith(pubKeyHash []byte) bool {
 	return bytes.Compare(out.PubkeyHash, pubKeyHash) == 0
 }
+
+// create a new TXOutput
+func NewTXOutput(value uint, address string) TXOutput {
+	out := TXOutput{
+		Value:      value,
+		PubkeyHash: nil,
+	}
+
+	out.Lock(address)
+	return out
+}
