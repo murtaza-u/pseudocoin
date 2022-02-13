@@ -2,6 +2,7 @@ package core
 
 import (
 	"encoding/hex"
+	"errors"
 
 	"github.com/boltdb/bolt"
 )
@@ -138,4 +139,43 @@ func (u *UTXOSet) FindUTXOs(pubkeyHash []byte) ([]TXOutput, error) {
 	})
 
 	return UTXOs, err
+}
+
+func (u *UTXOSet) FindSpendableOutputs(pubkeyHash []byte, amount uint) (uint, map[string][]int, error) {
+	if amount == 0 {
+		return 0, nil, errors.New("invalid amount")
+	}
+
+	var accumulated uint
+	spendableOutputs := make(map[string][]int)
+
+	err := u.Blockchain.DB.View(func(t *bolt.Tx) error {
+		b := t.Bucket([]byte(utxoBucket))
+		c := b.Cursor()
+
+	Accumulate:
+		for k, v := c.First(); k != nil; k, v = c.Next() {
+			txID := hex.EncodeToString(k)
+
+			outs, err := DeserializeOutputs(v)
+			if err != nil {
+				return err
+			}
+
+			for outIDX, out := range outs.Outputs {
+				if out.IsLockedWith(pubkeyHash) {
+					spendableOutputs[txID] = append(spendableOutputs[txID], outIDX)
+					accumulated += out.Value
+
+					if accumulated >= amount {
+						break Accumulate
+					}
+				}
+			}
+		}
+
+		return nil
+	})
+
+	return accumulated, spendableOutputs, err
 }
