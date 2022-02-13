@@ -77,3 +77,27 @@ func NewCBTX(address, data string) (Transaction, error) {
 func (tx Transaction) IsCoinbase() bool {
 	return len(tx.Inputs) == 1 && len(tx.Inputs[0].TxID) == 0 && tx.Inputs[0].Out == -1
 }
+
+func (tx Transaction) TrimmedCopy() Transaction {
+	var inputs []TXInput
+	var outputs []TXOutput
+
+	for _, in := range tx.Inputs {
+		inputs = append(inputs, TXInput{
+			TxID:      in.TxID,
+			Out:       in.Out,
+			Signature: nil,
+			PublicKey: nil,
+		})
+	}
+
+	for _, out := range tx.Outputs {
+		outputs = append(outputs, out)
+	}
+
+	return Transaction{
+		ID:      tx.ID,
+		Inputs:  inputs,
+		Outputs: outputs,
+	}
+}
