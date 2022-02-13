@@ -141,3 +141,42 @@ func (bc *Blockchain) VerifyTX(tx Transaction) (bool, error) {
 
 	return tx.Verify(prevTXs)
 }
+
+func (bc *Blockchain) MineBlock(txs []*Transaction) (Block, error) {
+	for _, tx := range txs {
+		isVerified, err := bc.VerifyTX(*tx)
+		if err != nil {
+			return Block{}, errors.New("Failed to verify transaction")
+		}
+
+		if !isVerified {
+			return Block{}, errors.New("One or more invalid transaction(s)")
+		}
+	}
+
+	newBlock, err := NewBlock(txs, bc.Tip)
+	if err != nil {
+		return Block{}, err
+	}
+
+	err = bc.DB.Update(func(t *bolt.Tx) error {
+		b := t.Bucket([]byte(blocksBucket))
+		err := b.Put([]byte("l"), newBlock.Hash)
+		if err != nil {
+			return err
+		}
+
+		serialBlock, err := newBlock.Serialize()
+		if err != nil {
+			return err
+		}
+
+		return b.Put(newBlock.Hash, serialBlock)
+	})
+	if err != nil {
+		return Block{}, err
+	}
+
+	bc.Tip = newBlock.Hash
+	return newBlock, nil
+}
