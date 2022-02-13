@@ -3,6 +3,7 @@ package core
 import (
 	"bytes"
 	"encoding/gob"
+	"time"
 )
 
 type Block struct {
@@ -40,4 +41,24 @@ func (b *Block) HashTXs() ([]byte, error) {
 
 	tree := NewMerkleTree(txs)
 	return tree.Root.Data, nil
+}
+
+func NewBlock(txs []*Transaction, prevBlockHash []byte) (Block, error) {
+	block := Block{
+		Timestamp:     time.Now().Unix(),
+		Transactions:  txs,
+		PrevBlockHash: prevBlockHash,
+		Nonce:         0,
+		Hash:          []byte{},
+	}
+
+	pow := NewPoW(&block)
+	hash, nonce, err := pow.Run()
+	if err != nil {
+		return Block{}, err
+	}
+
+	block.Nonce = nonce
+	block.Hash = hash
+	return block, nil
 }
