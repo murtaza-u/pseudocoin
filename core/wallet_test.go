@@ -41,7 +41,7 @@ func TestGetAddress(t *testing.T) {
 	}
 
 	t.Log(address)
-	if len(address) != 34 {
+	if !core.ValidateAddress(address) {
 		t.Fatal("invalid address")
 	}
 }
