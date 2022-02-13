@@ -2,9 +2,12 @@ package core
 
 import (
 	"bytes"
+	"crypto/ecdsa"
 	"crypto/rand"
 	"crypto/sha256"
 	"encoding/gob"
+	"encoding/hex"
+	"errors"
 	"fmt"
 )
 
@@ -96,8 +99,47 @@ func (tx Transaction) TrimmedCopy() Transaction {
 	}
 
 	return Transaction{
-		ID:      tx.ID,
+		ID:      nil,
 		Inputs:  inputs,
 		Outputs: outputs,
 	}
+}
+
+func (tx Transaction) Sign(privKey ecdsa.PrivateKey, prevTXs map[string]Transaction) error {
+	if tx.IsCoinbase() {
+		return nil
+	}
+
+	for _, in := range tx.Inputs {
+		if prevTXs[hex.EncodeToString(in.TxID)].ID == nil {
+			return errors.New("Previous transactions are invalid")
+		}
+	}
+
+	txCopy := tx.TrimmedCopy()
+
+	for idx, in := range txCopy.Inputs {
+		prevTX := prevTXs[hex.EncodeToString(in.TxID)]
+		txCopy.Inputs[idx].Signature = nil // just incase.....
+		txCopy.Inputs[idx].PublicKey = prevTX.Outputs[in.Out].PubkeyHash
+
+		hash, err := txCopy.Hash()
+		if err != nil {
+			return err
+		}
+
+		txCopy.ID = hash
+
+		txCopy.Inputs[idx].PublicKey = nil
+		r, s, err := ecdsa.Sign(rand.Reader, &privKey, txCopy.ID)
+
+		if err != nil {
+			return err
+		}
+
+		tx.Inputs[idx].Signature = append(r.Bytes(), s.Bytes()...)
+		txCopy.Inputs[idx].PublicKey = nil
+	}
+
+	return nil
 }
