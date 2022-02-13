@@ -41,10 +41,10 @@ func NewTXOutput(value uint, address string) TXOutput {
 }
 
 type TXOutputs struct {
-	outputs []TXOutput
+	Outputs []TXOutput
 }
 
-func (outs TXOutputs) serialize() ([]byte, error) {
+func (outs TXOutputs) Serialize() ([]byte, error) {
 	var buff bytes.Buffer
 	encoder := gob.NewEncoder(&buff)
 	if err := encoder.Encode(outs); err != nil {
@@ -54,7 +54,7 @@ func (outs TXOutputs) serialize() ([]byte, error) {
 	return buff.Bytes(), nil
 }
 
-func deserializeOutputs(encData []byte) (TXOutputs, error) {
+func DeserializeOutputs(encData []byte) (TXOutputs, error) {
 	decoder := gob.NewDecoder(bytes.NewReader(encData))
 	outputs := TXOutputs{}
 	if err := decoder.Decode(&outputs); err != nil {
