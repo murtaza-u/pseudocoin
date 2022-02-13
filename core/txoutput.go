@@ -53,3 +53,13 @@ func (outs TXOutputs) serialize() ([]byte, error) {
 
 	return buff.Bytes(), nil
 }
+
+func deserializeOutputs(encData []byte) (TXOutputs, error) {
+	decoder := gob.NewDecoder(bytes.NewReader(encData))
+	outputs := TXOutputs{}
+	if err := decoder.Decode(&outputs); err != nil {
+		return TXOutputs{}, err
+	}
+
+	return outputs, nil
+}
