@@ -38,3 +38,7 @@ func NewTXOutput(value uint, address string) TXOutput {
 	out.Lock(address)
 	return out
 }
+
+type TXOutputs struct {
+	outputs []TXOutput
+}
