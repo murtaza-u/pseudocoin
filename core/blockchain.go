@@ -180,3 +180,49 @@ func (bc *Blockchain) MineBlock(txs []*Transaction) (Block, error) {
 	bc.Tip = newBlock.Hash
 	return newBlock, nil
 }
+
+// scan the entire blockchain and find all UTXOs
+func (chain *Blockchain) findUXTOs() (map[string]TXOutputs, error) {
+	UTXOs := make(map[string]TXOutputs)
+	spentUTXOs := make(map[string][]int)
+	i := chain.iterator()
+
+	for {
+		block, err := i.Next()
+		if err != nil {
+			return UTXOs, err
+		}
+
+		if block == nil {
+			break
+		}
+
+		for _, tx := range block.Transactions {
+			txID := hex.EncodeToString(tx.ID)
+
+			if tx.IsCoinbase() != true {
+				for _, in := range tx.Inputs {
+					inID := hex.EncodeToString(in.TxID)
+					spentUTXOs[inID] = append(spentUTXOs[inID], in.Out)
+				}
+			}
+
+		Output:
+			for outIDX, out := range tx.Outputs {
+				if spentUTXOs[txID] != nil {
+					for _, spentOut := range spentUTXOs[txID] {
+						if spentOut == outIDX {
+							continue Output
+						}
+					}
+				}
+
+				outs := UTXOs[txID]
+				outs.Outputs = append(outs.Outputs, out)
+				UTXOs[txID] = outs
+			}
+		}
+	}
+
+	return UTXOs, nil
+}
