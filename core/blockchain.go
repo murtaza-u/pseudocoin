@@ -2,6 +2,7 @@ package core
 
 import (
 	"bytes"
+	"crypto/ecdsa"
 	"encoding/hex"
 	"errors"
 
@@ -140,6 +141,25 @@ func (bc *Blockchain) VerifyTX(tx Transaction) (bool, error) {
 	}
 
 	return tx.Verify(prevTXs)
+}
+
+func (bc *Blockchain) SignTX(tx Transaction, privKey ecdsa.PrivateKey) error {
+	if tx.IsCoinbase() {
+		return nil
+	}
+
+	prevTXs := make(map[string]Transaction)
+
+	for _, in := range tx.Inputs {
+		prevTX, err := bc.FindTXByID(in.TxID)
+		if err != nil {
+			return err
+		}
+
+		prevTXs[hex.EncodeToString(in.TxID)] = prevTX
+	}
+
+	return tx.Sign(privKey, prevTXs)
 }
 
 func (bc *Blockchain) MineBlock(txs []*Transaction) (Block, error) {
