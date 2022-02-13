@@ -1,6 +1,10 @@
 package core
 
-import "github.com/mr-tron/base58"
+import (
+	"bytes"
+
+	"github.com/mr-tron/base58"
+)
 
 type TXOutput struct {
 	Value      uint
@@ -17,4 +21,9 @@ func (out *TXOutput) Lock(address string) error {
 	pubKeyHash = pubKeyHash[1 : len(pubKeyHash)-addressChecksumLen]
 	out.PubkeyHash = pubKeyHash
 	return nil
+}
+
+// check if the output can be unlocked
+func (out TXOutput) IsLockedWith(pubKeyHash []byte) bool {
+	return bytes.Compare(out.PubkeyHash, pubKeyHash) == 0
 }
