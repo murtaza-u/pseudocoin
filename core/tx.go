@@ -131,16 +131,14 @@ func (tx *Transaction) Sign(privKey ecdsa.PrivateKey, prevTXs map[string]Transac
 		}
 
 		txCopy.ID = hash
-
 		txCopy.Inputs[idx].PublicKey = nil
-		r, s, err := ecdsa.Sign(rand.Reader, &privKey, txCopy.ID)
 
+		r, s, err := ecdsa.Sign(rand.Reader, &privKey, txCopy.ID)
 		if err != nil {
 			return err
 		}
 
 		tx.Inputs[idx].Signature = append(r.Bytes(), s.Bytes()...)
-		txCopy.Inputs[idx].PublicKey = nil
 	}
 
 	return nil
@@ -166,6 +164,12 @@ func (tx *Transaction) Verify(prevTXs map[string]Transaction) (bool, error) {
 		txCopy.Inputs[idx].Signature = nil // just incase.....
 		txCopy.Inputs[idx].PublicKey = prevTX.Outputs[in.Out].PubkeyHash
 
+		hash, err := txCopy.Hash()
+		if err != nil {
+			return false, err
+		}
+		txCopy.ID = hash
+
 		r := big.Int{}
 		s := big.Int{}
 		sigLen := len(in.Signature)
@@ -184,7 +188,7 @@ func (tx *Transaction) Verify(prevTXs map[string]Transaction) (bool, error) {
 			Y:     &y,
 		}
 
-		if !ecdsa.Verify(&rawPubKey, tx.ID, &r, &s) {
+		if !ecdsa.Verify(&rawPubKey, txCopy.ID, &r, &s) {
 			return false, nil
 		}
 
