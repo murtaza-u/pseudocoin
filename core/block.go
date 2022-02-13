@@ -62,3 +62,7 @@ func NewBlock(txs []*Transaction, prevBlockHash []byte) (Block, error) {
 	block.Hash = hash
 	return block, nil
 }
+
+func NewGenesisBlock(cbtx Transaction) (Block, error) {
+	return NewBlock([]*Transaction{&cbtx}, []byte{})
+}
