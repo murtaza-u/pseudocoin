@@ -23,7 +23,7 @@ func TestNewBlock(t *testing.T) {
 	}
 }
 
-func TestSerializeDeserialize(t *testing.T) {
+func TestSerializeDeserializeBlock(t *testing.T) {
 	result, err := block.Serialize()
 	if err != nil {
 		t.Error(err)
