@@ -2,6 +2,7 @@ package core
 
 import (
 	"bytes"
+	"encoding/gob"
 
 	"github.com/mr-tron/base58"
 )
@@ -41,4 +42,14 @@ func NewTXOutput(value uint, address string) TXOutput {
 
 type TXOutputs struct {
 	outputs []TXOutput
+}
+
+func (outs TXOutputs) serialize() ([]byte, error) {
+	var buff bytes.Buffer
+	encoder := gob.NewEncoder(&buff)
+	if err := encoder.Encode(outs); err != nil {
+		return nil, err
+	}
+
+	return buff.Bytes(), nil
 }
