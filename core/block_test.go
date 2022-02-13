@@ -2,46 +2,55 @@ package core_test
 
 import (
 	"testing"
-	"time"
 
 	"github.com/murtaza-udaipurwala/core/core"
 )
 
+var block core.Block
+
+func TestNewBlock(t *testing.T) {
+	var err error
+	block, err = core.NewBlock(
+		[]*core.Transaction{
+			{ID: []byte("1")},
+			{ID: []byte("2")},
+			{ID: []byte("3")},
+		}, []byte{},
+	)
+
+	if err != nil {
+		t.Error(err)
+	}
+}
+
 func TestSerializeDeserialize(t *testing.T) {
-	b := core.Block{
-		Timestamp:     time.Now().Unix(),
-		Nonce:         10,
-		PrevBlockHash: []byte{},
-		Hash:          []byte{},
-		Transactions:  []*core.Transaction{},
-	}
-
-	result, err := b.Serialize()
+	result, err := block.Serialize()
 	if err != nil {
 		t.Error(err)
 	}
 
-	b, err = core.DeserializeBlock(result)
+	b, err := core.DeserializeBlock(result)
 	if err != nil {
 		t.Error(err)
 	}
 
-	if b.Nonce != 10 {
+	if b.Nonce != block.Nonce {
 		t.Errorf("Block deserialization failed")
 	}
 }
 
 func TestHashTXs(t *testing.T) {
-	b := core.Block{Transactions: []*core.Transaction{
-		{ID: []byte("1")},
-		{ID: []byte("2")},
-		{ID: []byte("3")},
-	}}
-
-	hash, err := b.HashTXs()
+	hash, err := block.HashTXs()
 	if err != nil {
 		t.Error(err)
 	}
 
 	t.Logf("Hash: %s", hash)
+}
+
+func TestNewGenesisBlock(t *testing.T) {
+	_, err := core.NewGenesisBlock(core.Transaction{})
+	if err != nil {
+		t.Error(err)
+	}
 }
