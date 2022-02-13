@@ -32,7 +32,7 @@ func (b *Block) HashTXs() ([]byte, error) {
 	var txs [][]byte
 
 	for _, tx := range b.Transactions {
-		serialData, err := tx.serialize()
+		serialData, err := tx.Serialize()
 		if err != nil {
 			return nil, err
 		}
