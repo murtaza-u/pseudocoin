@@ -90,3 +90,10 @@ func NewBlockchain() (Blockchain, error) {
 		DB:  db,
 	}, nil
 }
+
+func (bc *Blockchain) iterator() *Iterator {
+	return &Iterator{
+		currentBlockHash: bc.Tip,
+		db: bc.DB,
+	}
+}
