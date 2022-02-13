@@ -2,6 +2,7 @@ package core
 
 import (
 	"bytes"
+	"encoding/hex"
 	"errors"
 
 	"github.com/boltdb/bolt"
@@ -120,4 +121,23 @@ func (bc *Blockchain) FindTXByID(ID []byte) (Transaction, error) {
 	}
 
 	return Transaction{}, errors.New("Transaction not found")
+}
+
+func (bc *Blockchain) VerifyTX(tx Transaction) (bool, error) {
+	if tx.IsCoinbase() {
+		return true, nil
+	}
+
+	prevTXs := make(map[string]Transaction)
+
+	for _, in := range tx.Inputs {
+		prevTX, err := bc.FindTXByID(in.TxID)
+		if err != nil {
+			return false, err
+		}
+
+		prevTXs[hex.EncodeToString(in.TxID)] = prevTX
+	}
+
+	return tx.Verify(prevTXs)
 }
