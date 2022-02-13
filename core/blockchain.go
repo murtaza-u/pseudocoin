@@ -1,6 +1,7 @@
 package core
 
 import (
+	"bytes"
 	"errors"
 
 	"github.com/boltdb/bolt"
@@ -94,6 +95,29 @@ func NewBlockchain() (Blockchain, error) {
 func (bc *Blockchain) iterator() *Iterator {
 	return &Iterator{
 		currentBlockHash: bc.Tip,
-		db: bc.DB,
+		db:               bc.DB,
 	}
+}
+
+func (bc *Blockchain) FindTXByID(ID []byte) (Transaction, error) {
+	i := bc.iterator()
+
+	for {
+		b, err := i.Next()
+		if err != nil {
+			return Transaction{}, err
+		}
+
+		if b == nil {
+			break
+		}
+
+		for _, tx := range b.Transactions {
+			if bytes.Compare(tx.ID, ID) == 0 {
+				return *tx, nil
+			}
+		}
+	}
+
+	return Transaction{}, errors.New("Transaction not found")
 }
