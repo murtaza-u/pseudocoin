@@ -28,3 +28,29 @@ func (tx Transaction) serialize() ([]byte, error) {
 	err := encoder.Encode(tx)
 	return buff.Bytes(), err
 }
+
+const subsidy = 100
+
+func NewCBTX(address, data string) (Transaction, error) {
+	in := TXInput{
+		TxID:      []byte{},
+		Out:       -1,
+		PublicKey: []byte(data),
+		Signature: nil,
+	}
+
+	out := NewTXOutput(subsidy, address)
+	tx := Transaction{
+		ID:      []byte{},
+		Inputs:  []TXInput{in},
+		Outputs: []TXOutput{out},
+	}
+
+	txHash, err := tx.Hash()
+	if err != nil {
+		return Transaction{}, err
+	}
+
+	tx.ID = txHash
+	return tx, nil
+}
