@@ -15,7 +15,7 @@ type Transaction struct {
 }
 
 func (tx Transaction) Hash() ([]byte, error) {
-	serialData, err := tx.serialize()
+	serialData, err := tx.Serialize()
 	if err != nil {
 		return []byte{}, err
 	}
@@ -24,7 +24,7 @@ func (tx Transaction) Hash() ([]byte, error) {
 	return hash[:], nil
 }
 
-func (tx Transaction) serialize() ([]byte, error) {
+func (tx Transaction) Serialize() ([]byte, error) {
 	var buff bytes.Buffer
 	encoder := gob.NewEncoder(&buff)
 	err := encoder.Encode(tx)
