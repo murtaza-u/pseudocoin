@@ -51,7 +51,7 @@ func (u *UTXOSet) Reindex() error {
 	return err
 }
 
-func (u *UTXOSet) update(block Block) error {
+func (u *UTXOSet) Update(block Block) error {
 	db := u.Blockchain.DB
 
 	err := db.Update(func(t *bolt.Tx) error {
@@ -111,4 +111,31 @@ func (u *UTXOSet) update(block Block) error {
 	})
 
 	return err
+}
+
+func (u *UTXOSet) FindUTXOs(pubkeyHash []byte) ([]TXOutput, error) {
+	var UTXOs []TXOutput
+	db := u.Blockchain.DB
+
+	err := db.View(func(t *bolt.Tx) error {
+		b := t.Bucket([]byte(utxoBucket))
+		c := b.Cursor()
+
+		for k, v := c.First(); k != nil; k, v = c.Next() {
+			outs, err := DeserializeOutputs(v)
+			if err != nil {
+				return err
+			}
+
+			for _, out := range outs.Outputs {
+				if out.IsLockedWith(pubkeyHash) {
+					UTXOs = append(UTXOs, out)
+				}
+			}
+		}
+
+		return nil
+	})
+
+	return UTXOs, err
 }
