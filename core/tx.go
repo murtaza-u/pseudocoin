@@ -31,6 +31,13 @@ func (tx Transaction) serialize() ([]byte, error) {
 	return buff.Bytes(), err
 }
 
+func DeserializeTX(data []byte) (Transaction, error) {
+	tx := Transaction{}
+	decoder := gob.NewDecoder(bytes.NewReader(data))
+	err := decoder.Decode(&tx)
+	return tx, err
+}
+
 const subsidy = 100
 
 func NewCBTX(address, data string) (Transaction, error) {
