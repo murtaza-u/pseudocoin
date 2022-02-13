@@ -14,6 +14,8 @@ type Wallet struct {
 	PubKey  []byte
 }
 
+const addressChecksumLen = 4
+
 func newKeyPair() (ecdsa.PrivateKey, []byte, error) {
 	curve := elliptic.P256()
 	priv, err := ecdsa.GenerateKey(curve, rand.Reader)
@@ -50,4 +52,12 @@ func HashPubKey(pub []byte) ([]byte, error) {
 
 	pubRIPEMD160 := RIPEMD160.Sum(nil)
 	return pubRIPEMD160, nil
+}
+
+func Checksum(pubKeyHash []byte) []byte {
+	firstSHA256 := sha256.Sum256(pubKeyHash)
+	secondSHA256 := sha256.Sum256(firstSHA256[:])
+
+	// checksum is only first 4 bytes of the resulting hash
+	return secondSHA256[:addressChecksumLen]
 }
