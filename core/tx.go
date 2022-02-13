@@ -2,8 +2,10 @@ package core
 
 import (
 	"bytes"
+	"crypto/rand"
 	"crypto/sha256"
 	"encoding/gob"
+	"fmt"
 )
 
 type Transaction struct {
@@ -32,6 +34,16 @@ func (tx Transaction) serialize() ([]byte, error) {
 const subsidy = 100
 
 func NewCBTX(address, data string) (Transaction, error) {
+	if len(data) == 0 {
+		randData := make([]byte, 20)
+		_, err := rand.Read(randData)
+		if err != nil {
+			return Transaction{}, err
+		}
+
+		data = fmt.Sprintf("%x", randData)
+	}
+
 	in := TXInput{
 		TxID:      []byte{},
 		Out:       -1,
