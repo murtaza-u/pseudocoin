@@ -197,3 +197,68 @@ func (tx *Transaction) Verify(prevTXs map[string]Transaction) (bool, error) {
 
 	return true, nil
 }
+
+func NewUTXOTransaction(receiver string, amount uint, wallet *Wallet, UTXOSet *UTXOSet) (Transaction, error) {
+	pubKeyHash, err := HashPubKey(wallet.PubKey)
+	if err != nil {
+		return Transaction{}, err
+	}
+
+	acc, spendableOuts, err := UTXOSet.FindSpendableOutputs(pubKeyHash, amount)
+	if err != nil {
+		return Transaction{}, err
+	}
+
+	if acc < amount {
+		return Transaction{}, errors.New("Not enough funds")
+	}
+
+	var inputs []TXInput
+	var outputs []TXOutput
+
+	// build a list of inputs
+	for ID, outs := range spendableOuts {
+		txID, err := hex.DecodeString(ID)
+		if err != nil {
+			return Transaction{}, err
+		}
+
+		for _, out := range outs {
+			in := TXInput{
+				TxID:      txID,
+				Out:       out,
+				Signature: nil,
+				PublicKey: wallet.PubKey,
+			}
+
+			inputs = append(inputs, in)
+		}
+	}
+
+	// build a list of outputs
+	outputs = append(outputs, NewTXOutput(amount, receiver))
+
+	sender, err := wallet.GetAddress()
+	if err != nil {
+		return Transaction{}, err
+	}
+
+	if acc > amount {
+		// a change
+		outputs = append(outputs, NewTXOutput(acc-amount, sender))
+	}
+
+	tx := Transaction{
+		ID:      nil,
+		Inputs:  inputs,
+		Outputs: outputs,
+	}
+
+	tx.ID, err = tx.Hash()
+	if err != nil {
+		return Transaction{}, err
+	}
+
+	UTXOSet.Blockchain.SignTX(tx, wallet.PrivKey)
+	return tx, nil
+}
