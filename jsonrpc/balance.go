@@ -8,30 +8,29 @@ import (
 	"github.com/murtaza-udaipurwala/pseudocoin/core"
 )
 
-func (rpc *RPC) GetBalance(r *http.Request, args *struct {
-	Address string
-}, resp *struct {
+type Balance struct {
 	Address string `json:"address,omitempty"`
 	Balance uint   `json:"balance,omitempty"`
-}) error {
+}
+
+func (rpc *RPC) GetBalance(r *http.Request, args *struct{ Address string }, resp *Balance) error {
 	if !core.ValidateAddress(args.Address) {
 		return errors.New("Invalid Address")
 	}
 
+	payload, err := base58.Decode(args.Address)
+	if err != nil {
+		return err
+	}
+
+	pubKeyHash := payload[1 : len(payload)-4]
+	outs, err := utxoset.FindUTXOs(pubKeyHash)
+	if err != nil {
+		return err
+	}
+
 	var balance uint
-
-	pubKeyHash, err := base58.Decode(args.Address)
-	if err != nil {
-		return err
-	}
-
-	pubKeyHash = pubKeyHash[1 : len(pubKeyHash)-4]
-	UTXOs, err := UTXOSet.FindUTXOs(pubKeyHash)
-	if err != nil {
-		return err
-	}
-
-	for _, out := range UTXOs {
+	for _, out := range outs {
 		balance += out.Value
 	}
 
