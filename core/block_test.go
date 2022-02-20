@@ -45,7 +45,7 @@ func TestHashTXs(t *testing.T) {
 		t.Error(err)
 	}
 
-	t.Logf("Hash: %s", hash)
+	t.Logf("Hash: %x", hash)
 }
 
 func TestNewGenesisBlock(t *testing.T) {

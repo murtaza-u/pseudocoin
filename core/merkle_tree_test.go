@@ -14,5 +14,5 @@ func TestMerkleTree(t *testing.T) {
 	}
 
 	tree := core.NewMerkleTree(data)
-	t.Logf("Root node: %s", tree.Root.Data)
+	t.Logf("Root node: %x", tree.Root.Data)
 }
