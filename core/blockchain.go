@@ -10,7 +10,6 @@ import (
 )
 
 const (
-	dbFile              = "blockchain.db"
 	blocksBucket        = "blocks"
 	genesisCoinbaseData = "I use Arch BTW"
 )
@@ -20,7 +19,7 @@ type Blockchain struct {
 	DB  *bolt.DB
 }
 
-func CreateBlockchain(address string) (Blockchain, error) {
+func CreateBlockchain(address, dbFile string) (Blockchain, error) {
 	if DBExists(dbFile) {
 		return Blockchain{}, errors.New("Blockchain already exists")
 	}
@@ -70,7 +69,7 @@ func CreateBlockchain(address string) (Blockchain, error) {
 	}, err
 }
 
-func NewBlockchain() (Blockchain, error) {
+func NewBlockchain(dbFile string) (Blockchain, error) {
 	if !DBExists(dbFile) {
 		return Blockchain{}, errors.New("Blockchain does not exists. Create one first")
 	}
@@ -202,7 +201,7 @@ func (bc *Blockchain) MineBlock(txs []*Transaction) (Block, error) {
 }
 
 // scan the entire blockchain and find all UTXOs
-func (chain *Blockchain) findUXTOs() (map[string]TXOutputs, error) {
+func (chain *Blockchain) FindUXTOs() (map[string]TXOutputs, error) {
 	UTXOs := make(map[string]TXOutputs)
 	spentUTXOs := make(map[string][]int)
 	i := chain.iterator()
