@@ -8,6 +8,12 @@ import (
 
 var wallet core.Wallet
 
+func TestValidateAddress(t *testing.T) {
+	if !core.ValidateAddress("1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa") {
+		t.Error("Failed to validate a valid address")
+	}
+}
+
 func TestNewWallet(t *testing.T) {
 	var err error
 	wallet, err = core.NewWallet()
