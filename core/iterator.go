@@ -24,5 +24,7 @@ func (i *Iterator) Next() (*Block, error) {
 		return err
 	})
 
+	i.currentBlockHash = block.PrevBlockHash
+
 	return &block, err
 }
