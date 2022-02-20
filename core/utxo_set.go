@@ -16,7 +16,7 @@ const utxoBucket = "utxo"
 func (u *UTXOSet) Reindex() error {
 	db := u.Blockchain.DB
 
-	utxos, err := u.Blockchain.findUXTOs()
+	utxos, err := u.Blockchain.FindUXTOs()
 	if err != nil {
 		return err
 	}
