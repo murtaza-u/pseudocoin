@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"testing"
 
-	"github.com/murtaza-udaipurwala/core"
+	"github.com/murtaza-udaipurwala/pseudocoin/core"
 )
 
 var out = core.TXOutput{

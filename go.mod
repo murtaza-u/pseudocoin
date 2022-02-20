@@ -1,4 +1,4 @@
-module github.com/murtaza-udaipurwala/core
+module github.com/murtaza-udaipurwala/pseudocoin
 
 go 1.17
 
