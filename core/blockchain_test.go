@@ -1,6 +1,7 @@
 package core_test
 
 import (
+	"os"
 	"testing"
 
 	"github.com/murtaza-udaipurwala/pseudocoin/core"
@@ -24,7 +25,7 @@ func TestCreateBlockchain(t *testing.T) {
 		t.Error(err)
 	}
 
-	bc, err := core.CreateBlockchain(address, db)
+	bc, err = core.CreateBlockchain(address, db)
 	if err != nil {
 		if err.Error() == blockchainExistsErr {
 			t.SkipNow()
@@ -35,18 +36,13 @@ func TestCreateBlockchain(t *testing.T) {
 	t.Logf("Tip: %x\n", bc.Tip)
 }
 
-func TestNewBlockchain(t *testing.T) {
-	var err error
-
-	bc, err = core.NewBlockchain(db)
-	if err != nil {
-		t.Error(err)
-	}
-}
-
 func TestFindUTXOs(t *testing.T) {
 	_, err := bc.FindUXTOs()
 	if err != nil {
 		t.Error(err)
 	}
+}
+
+func TestCleanUp(t *testing.T) {
+	os.Remove(db)
 }
