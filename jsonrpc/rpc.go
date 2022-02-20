@@ -11,20 +11,14 @@ import (
 	"github.com/murtaza-udaipurwala/pseudocoin/core"
 )
 
-var bc core.Blockchain
-var UTXOSet core.UTXOSet
+var blockchain core.Blockchain
+var utxoset core.UTXOSet
 
 type RPC struct{}
 
-func InitRPCServer(dbFile string) error {
-	var err error
-	bc, err = core.NewBlockchain(dbFile)
-	if err != nil {
-		return err
-	}
-	defer bc.DB.Close()
-
-	UTXOSet = core.UTXOSet{Blockchain: &bc}
+func InitRPCServer(dbFile string, bc core.Blockchain, UTXOSet core.UTXOSet) error {
+	blockchain = bc
+	utxoset = UTXOSet
 
 	s := rpc.NewServer()
 	s.RegisterCodec(json.NewCodec(), "application/json")
@@ -34,6 +28,10 @@ func InitRPCServer(dbFile string) error {
 	r.Handle("/rpc", s)
 
 	port := os.Getenv("PORT")
+	if len(port) == 0 {
+		port = "5000"
+	}
+
 	log.Printf("Listening on port :%s\n", port)
 	return http.ListenAndServe(":"+port, r)
 }
