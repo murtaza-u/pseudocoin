@@ -3,7 +3,7 @@ package core_test
 import (
 	"testing"
 
-	"github.com/murtaza-udaipurwala/core/core"
+	"github.com/murtaza-udaipurwala/core"
 )
 
 func TestNext(t *testing.T) {

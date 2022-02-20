@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"testing"
 
-	"github.com/murtaza-udaipurwala/core/core"
+	"github.com/murtaza-udaipurwala/core"
 )
 
 var out = core.TXOutput{

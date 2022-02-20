@@ -4,7 +4,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/murtaza-udaipurwala/core/core"
+	"github.com/murtaza-udaipurwala/core"
 )
 
 var pow = core.NewPoW(&core.Block{
