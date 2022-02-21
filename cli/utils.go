@@ -60,3 +60,11 @@ func randomString() (string, error) {
 
 	return string(b), nil
 }
+
+func fileExists(file string) bool {
+	if _, err := os.Stat(file); os.IsNotExist(err) {
+		return false
+	}
+
+	return true
+}
