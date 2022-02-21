@@ -12,11 +12,8 @@ type CLI struct {
 	UTXOSet    core.UTXOSet
 }
 
-func NewCLI(bc core.Blockchain, UTXOSet core.UTXOSet) CLI {
-	return CLI{
-		Blockchain: bc,
-		UTXOSet:    UTXOSet,
-	}
+func NewCLI() CLI {
+	return CLI{}
 }
 
 func (cli *CLI) ValidateArgs() error {
