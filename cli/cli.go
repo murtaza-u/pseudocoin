@@ -21,7 +21,7 @@ func NewCLI() CLI {
 	return CLI{}
 }
 
-func (cli *CLI) ValidateArgs() error {
+func (cli *CLI) validateArgs() error {
 	if len(os.Args) < 2 {
 		return errors.New("No arguments provided")
 	}
@@ -30,7 +30,7 @@ func (cli *CLI) ValidateArgs() error {
 }
 
 func (cli *CLI) Run() (interface{}, error) {
-	err := cli.ValidateArgs()
+	err := cli.validateArgs()
 	if err != nil {
 		return nil, err
 	}
@@ -61,7 +61,7 @@ func (cli *CLI) Run() (interface{}, error) {
 	getBalanceCMDAddr := getBalanceCMD.String("addr", "", "Pseudocoin address")
 
 	flag.Parse()
-	cli.Config.Load(*configFile)
+	cli.Config.load(*configFile)
 
 	switch os.Args[1] {
 	case "wallet":
@@ -86,35 +86,35 @@ func (cli *CLI) Run() (interface{}, error) {
 
 	if walletCMD.Parsed() {
 		if *walletCMDCreate {
-			return cli.CreateWallet(*walletCMDName)
+			return cli.createWallet(*walletCMDName)
 		}
 	}
 
 	if addressCMD.Parsed() {
 		if len(*addressCMDFile) != 0 {
-			return cli.GetAddress(*addressCMDFile)
+			return cli.getAddress(*addressCMDFile)
 		}
 
 		if len(*addressCMDPubKey) != 0 {
-			return cli.GetAddress(*addressCMDPubKey)
+			return cli.getAddress(*addressCMDPubKey)
 		}
 	}
 
 	if blockchainCMD.Parsed() {
 		if len(*blockchainCMDCreate) != 0 {
-			return cli.CreateBlockchain(*blockchainCMDCreate)
+			return cli.createBlockchain(*blockchainCMDCreate)
 		}
 	}
 
 	if centralNodeCMD.Parsed() {
 		if len(*centralNodeCMDStart) != 0 {
-			return cli.StartCentralNode(*centralNodeCMDStart)
+			return cli.startCentralNode(*centralNodeCMDStart)
 		}
 	}
 
 	if getBalanceCMD.Parsed() {
 		if len(*getBalanceCMDAddr) != 0 {
-			return cli.GetBalance(*getBalanceCMDAddr)
+			return cli.getBalance(*getBalanceCMDAddr)
 		}
 	}
 

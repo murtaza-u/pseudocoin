@@ -10,7 +10,7 @@ type Config struct {
 	Address string `json:"node_address"`
 }
 
-func (c *Config) Load(path string) error {
+func (c *Config) load(path string) error {
 	data, err := ioutil.ReadFile(path)
 	if err != nil {
 		return err

@@ -10,7 +10,7 @@ type address struct {
 	Address string `json:"address"`
 }
 
-func (cli *CLI) GetAddress(arg string) (interface{}, error) {
+func (cli *CLI) getAddress(arg string) (interface{}, error) {
 	var pubkey []byte
 	var err error
 

@@ -7,7 +7,7 @@ type wallet struct {
 	Msg     string `json:"msg"`
 }
 
-func (cli *CLI) CreateWallet(name string) (interface{}, error) {
+func (cli *CLI) createWallet(name string) (interface{}, error) {
 	var err error
 
 	if len(name) == 0 {

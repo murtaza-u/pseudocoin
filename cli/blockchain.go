@@ -11,7 +11,7 @@ type blockchain struct {
 	DBFile  string `json:"dbfile"`
 }
 
-func (cli *CLI) CreateBlockchain(dbFile string) (interface{}, error) {
+func (cli *CLI) createBlockchain(dbFile string) (interface{}, error) {
 	if len(cli.Config.Address) == 0 {
 		return nil, errors.New("Please provide node's address in config.json")
 	}

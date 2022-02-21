@@ -5,7 +5,7 @@ import (
 	"github.com/murtaza-udaipurwala/pseudocoin/jsonrpc"
 )
 
-func (cli *CLI) StartCentralNode(dbFile string) (interface{}, error) {
+func (cli *CLI) startCentralNode(dbFile string) (interface{}, error) {
 	chain, err := core.NewBlockchain(dbFile)
 	if err != nil {
 		return nil, err

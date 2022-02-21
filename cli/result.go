@@ -6,13 +6,13 @@ import (
 	"log"
 )
 
-type Result struct {
+type result struct {
 	Result interface{} `json:"result,omitempty"`
 	Err    string      `json:"err,omitempty"`
 }
 
 func (cli *CLI) Print(res interface{}, err error) {
-	result := Result{Result: res}
+	result := result{Result: res}
 	if err != nil {
 		result.Err = err.Error()
 	}

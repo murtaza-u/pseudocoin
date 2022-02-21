@@ -18,7 +18,7 @@ type balanceParams struct {
 	Address string `json:"address,omitempty"`
 }
 
-func (cli *CLI) GetBalance(addr string) (interface{}, error) {
+func (cli *CLI) getBalance(addr string) (interface{}, error) {
 	if !core.ValidateAddress(addr) {
 		return nil, errors.New("Invalid address")
 	}
