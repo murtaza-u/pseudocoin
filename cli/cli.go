@@ -26,3 +26,12 @@ func (cli *CLI) ValidateArgs() error {
 
 	return nil
 }
+
+func (cli *CLI) Run() (interface{}, error) {
+	err := cli.ValidateArgs()
+	if err != nil {
+		return nil, err
+	}
+
+	return nil, nil
+}
