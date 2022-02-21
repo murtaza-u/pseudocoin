@@ -8,8 +8,8 @@ import (
 )
 
 type TXOutput struct {
-	Value      uint
-	PubkeyHash []byte
+	Value      uint   `json:"value"`
+	PubkeyHash []byte `json:"public_key_hash"`
 }
 
 // sign the output

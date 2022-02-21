@@ -3,10 +3,10 @@ package core
 import "bytes"
 
 type TXInput struct {
-	TxID      []byte
-	Out       int
-	PublicKey []byte
-	Signature []byte
+	TxID      []byte `json:"txid"`
+	Out       int    `json:"out"`
+	PublicKey []byte `json:"public_key"`
+	Signature []byte `json:"signature"`
 }
 
 // check whether the address initiated the transaction

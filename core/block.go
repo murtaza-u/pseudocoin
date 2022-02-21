@@ -7,11 +7,11 @@ import (
 )
 
 type Block struct {
-	Timestamp     int64
-	Nonce         uint64
-	PrevBlockHash []byte
-	Hash          []byte
-	Transactions  []*Transaction
+	Timestamp     int64          `json:"timestamp"`
+	Nonce         uint64         `json:"nonce"`
+	PrevBlockHash []byte         `json:"prev_block_hash"`
+	Hash          []byte         `json:"hash"`
+	Transactions  []*Transaction `json:"transactions"`
 }
 
 func (b Block) Serialize() ([]byte, error) {
