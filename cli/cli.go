@@ -2,6 +2,7 @@ package cli
 
 import (
 	"errors"
+	"flag"
 	"os"
 
 	"github.com/murtaza-udaipurwala/pseudocoin/core"
@@ -29,6 +30,13 @@ func (cli *CLI) Run() (interface{}, error) {
 	if err != nil {
 		return nil, err
 	}
+
+	configFile := flag.String("config", ".config.json", "Path to the config file")
+	flag.Parse()
+
+
+	config := Config{}
+	config.Load(*configFile)
 
 	return nil, nil
 }
