@@ -37,6 +37,10 @@ func (cli *CLI) Run() (interface{}, error) {
 	walletCMDCreate := walletCMD.Bool("create", false, "Create a new wallet")
 	walletCMDName := walletCMD.String("name", "", "Give a name to the wallet")
 
+	addressCMD := flag.NewFlagSet("getaddress", flag.ExitOnError)
+	addressCMDFile := addressCMD.String("i", "", "Specify public key file")
+	addressCMDPubKey := addressCMD.String("pubkey", "", "Pass public key")
+
 	flag.Parse()
 	config := Config{}
 	config.Load(*configFile)
@@ -44,6 +48,9 @@ func (cli *CLI) Run() (interface{}, error) {
 	switch os.Args[1] {
 	case "wallet":
 		err = walletCMD.Parse(os.Args[2:])
+
+	case "getaddress":
+		err = addressCMD.Parse(os.Args[2:])
 	}
 
 	if err != nil {
@@ -53,6 +60,16 @@ func (cli *CLI) Run() (interface{}, error) {
 	if walletCMD.Parsed() {
 		if *walletCMDCreate {
 			return cli.CreateWallet(*walletCMDName)
+		}
+	}
+
+	if addressCMD.Parsed() {
+		if len(*addressCMDFile) != 0 {
+			return cli.GetAddress(*addressCMDFile)
+		}
+
+		if len(*addressCMDPubKey) != 0 {
+			return cli.GetAddress(*addressCMDPubKey)
 		}
 	}
 
