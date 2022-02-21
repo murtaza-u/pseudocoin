@@ -109,7 +109,7 @@ func (w Wallet) EncodePrivKeys() (string, error) {
 	return base58.Encode(buff.Bytes()), nil
 }
 
-func (w Wallet) DecodePrivKeys(encPrivKey string) error {
+func (w *Wallet) DecodePrivKeys(encPrivKey string) error {
 	gob.Register(elliptic.P256())
 
 	privKey := ecdsa.PrivateKey{}
@@ -127,7 +127,7 @@ func (w Wallet) EncodePubKeys() string {
 	return base58.Encode(w.PubKey)
 }
 
-func (w Wallet) DecodePubKeys(encPubKey string) error {
+func (w *Wallet) DecodePubKeys(encPubKey string) error {
 	pubKey, err := base58.Decode(encPubKey)
 	if err != nil {
 		return err
