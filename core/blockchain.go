@@ -93,7 +93,7 @@ func NewBlockchain(dbFile string) (Blockchain, error) {
 	}, nil
 }
 
-func (bc *Blockchain) iterator() *Iterator {
+func (bc *Blockchain) Iterator() *Iterator {
 	return &Iterator{
 		currentBlockHash: bc.Tip,
 		db:               bc.DB,
@@ -101,7 +101,7 @@ func (bc *Blockchain) iterator() *Iterator {
 }
 
 func (bc *Blockchain) FindTXByID(ID []byte) (Transaction, error) {
-	i := bc.iterator()
+	i := bc.Iterator()
 
 	for {
 		b, err := i.Next()
@@ -204,7 +204,7 @@ func (bc *Blockchain) MineBlock(txs []*Transaction) (Block, error) {
 func (chain *Blockchain) FindUXTOs() (map[string]TXOutputs, error) {
 	UTXOs := make(map[string]TXOutputs)
 	spentUTXOs := make(map[string][]int)
-	i := chain.iterator()
+	i := chain.Iterator()
 
 	for {
 		block, err := i.Next()
