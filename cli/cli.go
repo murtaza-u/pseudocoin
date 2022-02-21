@@ -32,11 +32,28 @@ func (cli *CLI) Run() (interface{}, error) {
 	}
 
 	configFile := flag.String("config", ".config.json", "Path to the config file")
+
+	walletCMD := flag.NewFlagSet("wallet", flag.ExitOnError)
+	walletCMDCreate := walletCMD.Bool("create", false, "Create a new wallet")
+
 	flag.Parse()
-
-
 	config := Config{}
 	config.Load(*configFile)
 
-	return nil, nil
+	switch os.Args[1] {
+	case "wallet":
+		err = walletCMD.Parse(os.Args[2:])
+	}
+
+	if err != nil {
+		return nil, err
+	}
+
+	if walletCMD.Parsed() {
+		if *walletCMDCreate {
+
+		}
+	}
+
+	return nil, errors.New("Invalid arguments")
 }
