@@ -15,6 +15,8 @@ type CLI struct {
 	Config     Config
 }
 
+const URL = "http://localhost:5000/rpc"
+
 func NewCLI() CLI {
 	return CLI{}
 }
@@ -55,6 +57,9 @@ func (cli *CLI) Run() (interface{}, error) {
 	centralNodeCMD := flag.NewFlagSet("centralnode", flag.ExitOnError)
 	centralNodeCMDStart := centralNodeCMD.String("start", "", "Path to blockchain DB")
 
+	getBalanceCMD := flag.NewFlagSet("getbalance", flag.ExitOnError)
+	getBalanceCMDAddr := getBalanceCMD.String("addr", "", "Pseudocoin address")
+
 	flag.Parse()
 	cli.Config.Load(*configFile)
 
@@ -70,6 +75,9 @@ func (cli *CLI) Run() (interface{}, error) {
 
 	case "centralnode":
 		err = centralNodeCMD.Parse(os.Args[2:])
+
+	case "getbalance":
+		err = getBalanceCMD.Parse(os.Args[2:])
 	}
 
 	if err != nil {
@@ -101,6 +109,12 @@ func (cli *CLI) Run() (interface{}, error) {
 	if centralNodeCMD.Parsed() {
 		if len(*centralNodeCMDStart) != 0 {
 			return cli.StartCentralNode(*centralNodeCMDStart)
+		}
+	}
+
+	if getBalanceCMD.Parsed() {
+		if len(*getBalanceCMDAddr) != 0 {
+			return cli.GetBalance(*getBalanceCMDAddr)
 		}
 	}
 
