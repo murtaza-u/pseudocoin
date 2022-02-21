@@ -6,7 +6,8 @@ import (
 )
 
 type Config struct {
-	DB string `json:"db"`
+	DB      string `json:"db"`
+	Address string `json:"node_address"`
 }
 
 func (c *Config) Load(path string) error {
