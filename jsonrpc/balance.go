@@ -9,8 +9,8 @@ import (
 )
 
 type Balance struct {
-	Address string `json:"address,omitempty"`
-	Balance uint   `json:"balance,omitempty"`
+	Address string `json:"address"`
+	Balance uint   `json:"balance"`
 }
 
 func (rpc *RPC) GetBalance(r *http.Request, args *struct{ Address string }, resp *Balance) error {
