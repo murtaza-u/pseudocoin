@@ -35,6 +35,7 @@ func (cli *CLI) Run() (interface{}, error) {
 
 	walletCMD := flag.NewFlagSet("wallet", flag.ExitOnError)
 	walletCMDCreate := walletCMD.Bool("create", false, "Create a new wallet")
+	walletCMDName := walletCMD.String("name", "", "Give a name to the wallet")
 
 	flag.Parse()
 	config := Config{}
@@ -51,7 +52,7 @@ func (cli *CLI) Run() (interface{}, error) {
 
 	if walletCMD.Parsed() {
 		if *walletCMDCreate {
-
+			return cli.CreateWallet(*walletCMDName)
 		}
 	}
 
