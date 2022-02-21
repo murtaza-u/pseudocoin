@@ -52,6 +52,9 @@ func (cli *CLI) Run() (interface{}, error) {
 	blockchainCMD := flag.NewFlagSet("blockchain", flag.ExitOnError)
 	blockchainCMDCreate := blockchainCMD.String("create", "", "Create a new blockchain")
 
+	centralNodeCMD := flag.NewFlagSet("centralnode", flag.ExitOnError)
+	centralNodeCMDStart := centralNodeCMD.String("start", "", "Path to blockchain DB")
+
 	flag.Parse()
 	cli.Config.Load(*configFile)
 
@@ -64,6 +67,9 @@ func (cli *CLI) Run() (interface{}, error) {
 
 	case "blockchain":
 		err = blockchainCMD.Parse(os.Args[2:])
+
+	case "centralnode":
+		err = centralNodeCMD.Parse(os.Args[2:])
 	}
 
 	if err != nil {
@@ -89,6 +95,12 @@ func (cli *CLI) Run() (interface{}, error) {
 	if blockchainCMD.Parsed() {
 		if len(*blockchainCMDCreate) != 0 {
 			return cli.CreateBlockchain(*blockchainCMDCreate)
+		}
+	}
+
+	if centralNodeCMD.Parsed() {
+		if len(*centralNodeCMDStart) != 0 {
+			return cli.StartCentralNode(*centralNodeCMDStart)
 		}
 	}
 
