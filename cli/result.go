@@ -7,8 +7,8 @@ import (
 )
 
 type Result struct {
-	Result interface{} `json:"result"`
-	Err    string      `json:"err"`
+	Result interface{} `json:"result,omitempty"`
+	Err    string      `json:"err,omitempty"`
 }
 
 func (cli *CLI) Print(res interface{}, err error) {
