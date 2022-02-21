@@ -1,6 +1,11 @@
 package cli
 
-import "github.com/murtaza-udaipurwala/pseudocoin/core"
+import (
+	"errors"
+	"os"
+
+	"github.com/murtaza-udaipurwala/pseudocoin/core"
+)
 
 type CLI struct {
 	Blockchain core.Blockchain
@@ -12,4 +17,12 @@ func NewCLI(bc core.Blockchain, UTXOSet core.UTXOSet) CLI {
 		Blockchain: bc,
 		UTXOSet:    UTXOSet,
 	}
+}
+
+func (cli *CLI) ValidateArgs() error {
+	if len(os.Args) < 2 {
+		return errors.New("No arguments provided")
+	}
+
+	return nil
 }
