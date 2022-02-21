@@ -6,6 +6,7 @@ import (
 	"crypto/elliptic"
 	"crypto/rand"
 	"crypto/sha256"
+	"encoding/gob"
 
 	"github.com/mr-tron/base58"
 	"golang.org/x/crypto/ripemd160"
@@ -67,6 +68,20 @@ func Checksum(pubKeyHash []byte) []byte {
 	return secondSHA256[:addressChecksumLen]
 }
 
+func ValidateAddress(address string) bool {
+	payload, err := base58.Decode(address)
+	if err != nil {
+		return false
+	}
+
+	checksum := payload[len(payload)-addressChecksumLen:]
+	version := payload[0]
+	pubKeyHash := payload[1 : len(payload)-addressChecksumLen]
+
+	targetChecksum := Checksum(append([]byte{version}, pubKeyHash...))
+	return bytes.Compare(checksum, targetChecksum) == 0
+}
+
 func (w Wallet) GetAddress() (string, error) {
 	pubKeyHash, err := HashPubKey(w.PubKey)
 	if err != nil {
@@ -80,16 +95,44 @@ func (w Wallet) GetAddress() (string, error) {
 	return base58.Encode(fullPayload), nil
 }
 
-func ValidateAddress(address string) bool {
-	payload, err := base58.Decode(address)
+func (w Wallet) EncodePrivKeys() (string, error) {
+	gob.Register(elliptic.P256())
+
+	var buff bytes.Buffer
+	encoder := gob.NewEncoder(&buff)
+
+	err := encoder.Encode(w.PrivKey)
 	if err != nil {
-		return false
+		return "", err
 	}
 
-	checksum := payload[len(payload)-addressChecksumLen:]
-	version := payload[0]
-	pubKeyHash := payload[1 : len(payload)-addressChecksumLen]
+	return base58.Encode(buff.Bytes()), nil
+}
 
-	targetChecksum := Checksum(append([]byte{version}, pubKeyHash...))
-	return bytes.Compare(checksum, targetChecksum) == 0
+func (w Wallet) DecodePrivKeys(encPrivKey string) error {
+	gob.Register(elliptic.P256())
+
+	privKey := ecdsa.PrivateKey{}
+	decoder := gob.NewDecoder(bytes.NewReader([]byte(encPrivKey)))
+	err := decoder.Decode(&privKey)
+	if err != nil {
+		return err
+	}
+
+	w.PrivKey = privKey
+	return nil
+}
+
+func (w Wallet) EncodePubKeys() string {
+	return base58.Encode(w.PubKey)
+}
+
+func (w Wallet) DecodePubKeys(encPubKey string) error {
+	pubKey, err := base58.Decode(encPubKey)
+	if err != nil {
+		return err
+	}
+
+	w.PubKey = pubKey
+	return nil
 }
