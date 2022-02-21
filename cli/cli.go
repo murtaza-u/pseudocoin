@@ -4,6 +4,7 @@ import (
 	"errors"
 	"flag"
 	"os"
+	"path"
 
 	"github.com/murtaza-udaipurwala/pseudocoin/core"
 )
@@ -11,6 +12,7 @@ import (
 type CLI struct {
 	Blockchain core.Blockchain
 	UTXOSet    core.UTXOSet
+	Config     Config
 }
 
 func NewCLI() CLI {
@@ -31,7 +33,13 @@ func (cli *CLI) Run() (interface{}, error) {
 		return nil, err
 	}
 
-	configFile := flag.String("config", ".config.json", "Path to the config file")
+	createHome()
+	home, err := getHome()
+	if err != nil {
+		return nil, err
+	}
+
+	configFile := flag.String("config", path.Join(home, "config.json"), "Path to the config file")
 
 	walletCMD := flag.NewFlagSet("wallet", flag.ExitOnError)
 	walletCMDCreate := walletCMD.Bool("create", false, "Create a new wallet")
@@ -41,9 +49,11 @@ func (cli *CLI) Run() (interface{}, error) {
 	addressCMDFile := addressCMD.String("i", "", "Specify public key file")
 	addressCMDPubKey := addressCMD.String("pubkey", "", "Pass public key")
 
+	blockchainCMD := flag.NewFlagSet("blockchain", flag.ExitOnError)
+	blockchainCMDCreate := blockchainCMD.String("create", "", "Create a new blockchain")
+
 	flag.Parse()
-	config := Config{}
-	config.Load(*configFile)
+	cli.Config.Load(*configFile)
 
 	switch os.Args[1] {
 	case "wallet":
@@ -51,6 +61,9 @@ func (cli *CLI) Run() (interface{}, error) {
 
 	case "getaddress":
 		err = addressCMD.Parse(os.Args[2:])
+
+	case "blockchain":
+		err = blockchainCMD.Parse(os.Args[2:])
 	}
 
 	if err != nil {
@@ -70,6 +83,12 @@ func (cli *CLI) Run() (interface{}, error) {
 
 		if len(*addressCMDPubKey) != 0 {
 			return cli.GetAddress(*addressCMDPubKey)
+		}
+	}
+
+	if blockchainCMD.Parsed() {
+		if len(*blockchainCMDCreate) != 0 {
+			return cli.CreateBlockchain(*blockchainCMDCreate)
 		}
 	}
 
