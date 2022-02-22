@@ -1,3 +1,4 @@
 {
-    "db": "blockchain.db"
+    "db": "blockchain.db",
+    "node_address": ""
 }
