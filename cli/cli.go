@@ -12,7 +12,7 @@ import (
 type CLI struct {
 	Blockchain core.Blockchain
 	UTXOSet    core.UTXOSet
-	Config     Config
+	Config     config
 }
 
 const URL = "http://localhost:5000/rpc"

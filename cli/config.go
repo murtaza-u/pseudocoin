@@ -5,12 +5,12 @@ import (
 	"io/ioutil"
 )
 
-type Config struct {
+type config struct {
 	DB      string `json:"db"`
 	Address string `json:"node_address"`
 }
 
-func (c *Config) load(path string) error {
+func (c *config) load(path string) error {
 	data, err := ioutil.ReadFile(path)
 	if err != nil {
 		return err

@@ -6,7 +6,7 @@ import (
 	"github.com/murtaza-udaipurwala/pseudocoin/core"
 )
 
-type Blocks struct {
+type blocks struct {
 	Blocks []core.Block `json:"blocks"`
 }
 
@@ -30,7 +30,7 @@ func getBlockHeight() (uint, error) {
 	return height, nil
 }
 
-func (rpc *RPC) GetBlocks(r *http.Request, args *struct{ Height uint }, resp *Blocks) error {
+func (rpc *RPC) GetBlocks(r *http.Request, args *struct{ Height uint }, resp *blocks) error {
 	i := blockchain.Iterator()
 	height, err := getBlockHeight()
 	if err != nil {
