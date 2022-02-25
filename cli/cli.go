@@ -60,6 +60,13 @@ func (cli *CLI) Run() (interface{}, error) {
 	getBalanceCMD := flag.NewFlagSet("getbalance", flag.ExitOnError)
 	getBalanceCMDAddr := getBalanceCMD.String("addr", "", "Pseudocoin address")
 
+	sendCMD := flag.NewFlagSet("send", flag.ExitOnError)
+	sendCMDSender := sendCMD.String("sender", "", "Sender's address")
+	sendCMDRecv := sendCMD.String("recv", "", "receiver's address")
+	sendCMDAmount := sendCMD.Uint("amount", 0, "amount")
+	sendCMDPriv := sendCMD.String("priv", "", "sender's private key")
+	sendCMDPub := sendCMD.String("pub", "", "sender's public key")
+
 	flag.Parse()
 	cli.Config.load(*configFile)
 
@@ -78,6 +85,9 @@ func (cli *CLI) Run() (interface{}, error) {
 
 	case "getbalance":
 		err = getBalanceCMD.Parse(os.Args[2:])
+
+	case "send":
+		err = sendCMD.Parse(os.Args[2:])
 	}
 
 	if err != nil {
@@ -115,6 +125,12 @@ func (cli *CLI) Run() (interface{}, error) {
 	if getBalanceCMD.Parsed() {
 		if len(*getBalanceCMDAddr) != 0 {
 			return cli.getBalance(*getBalanceCMDAddr)
+		}
+	}
+
+	if sendCMD.Parsed() {
+		if len(*sendCMDSender) != 0 && len(*sendCMDRecv) != 0 && len(*sendCMDPriv) != 0 && len(*sendCMDPub) != 0 && *sendCMDAmount != 0 {
+			return cli.send(*sendCMDRecv, *sendCMDSender, *sendCMDPriv, *sendCMDPub, *sendCMDAmount)
 		}
 	}
 
