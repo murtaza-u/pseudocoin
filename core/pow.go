@@ -3,6 +3,7 @@ package core
 import (
 	"bytes"
 	"crypto/sha256"
+	"fmt"
 	"math"
 	"math/big"
 	"time"
@@ -62,6 +63,8 @@ func (pow *PoW) Run() ([]byte, uint64, error) {
 		}
 
 		hash = sha256.Sum256(data)
+		fmt.Printf("\r%x", hash)
+
 		hashInt.SetBytes(hash[:])
 
 		if hashInt.Cmp(pow.Target) == -1 {
@@ -70,6 +73,8 @@ func (pow *PoW) Run() ([]byte, uint64, error) {
 
 		nonce++
 	}
+
+	fmt.Println()
 
 	return hash[:], nonce, err
 }
