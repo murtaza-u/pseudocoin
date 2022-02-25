@@ -198,8 +198,8 @@ func (tx *Transaction) Verify(prevTXs map[string]Transaction) (bool, error) {
 	return true, nil
 }
 
-func NewUTXOTransaction(receiver string, amount uint, wallet *Wallet, UTXOSet *UTXOSet) (Transaction, error) {
-	pubKeyHash, err := HashPubKey(wallet.PubKey)
+func NewUTXOTransaction(receiver, sender string, senderPubKey []byte, amount uint, UTXOSet *UTXOSet) (Transaction, error) {
+	pubKeyHash, err := HashPubKey(senderPubKey)
 	if err != nil {
 		return Transaction{}, err
 	}
@@ -228,7 +228,7 @@ func NewUTXOTransaction(receiver string, amount uint, wallet *Wallet, UTXOSet *U
 				TxID:      txID,
 				Out:       out,
 				Signature: nil,
-				PublicKey: wallet.PubKey,
+				PublicKey: senderPubKey,
 			}
 
 			inputs = append(inputs, in)
@@ -237,11 +237,6 @@ func NewUTXOTransaction(receiver string, amount uint, wallet *Wallet, UTXOSet *U
 
 	// build a list of outputs
 	outputs = append(outputs, NewTXOutput(amount, receiver))
-
-	sender, err := wallet.GetAddress()
-	if err != nil {
-		return Transaction{}, err
-	}
 
 	if acc > amount {
 		// a change
@@ -259,6 +254,6 @@ func NewUTXOTransaction(receiver string, amount uint, wallet *Wallet, UTXOSet *U
 		return Transaction{}, err
 	}
 
-	UTXOSet.Blockchain.SignTX(tx, wallet.PrivKey)
+	// UTXOSet.Blockchain.SignTX(tx, wallet.PrivKey)
 	return tx, nil
 }
