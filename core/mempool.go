@@ -42,22 +42,24 @@ func (mem *Mempool) Add(tx Transaction) error {
 }
 
 func (mem *Mempool) Queue() error {
-	err := mem.Blockchain.DB.Update(func(t *bolt.Tx) error {
-		pb, err := t.CreateBucketIfNotExists([]byte(pending))
-		if err != nil {
-			return err
-		}
+	var err error
 
-		qb, err := t.CreateBucketIfNotExists([]byte(queue))
-		if err != nil {
-			return err
-		}
+	for {
+		mem.Mutex.Lock()
 
-		pc := pb.Cursor()
-		qc := qb.Cursor()
+		err = mem.Blockchain.DB.Update(func(t *bolt.Tx) error {
+			pb, err := t.CreateBucketIfNotExists([]byte(pending))
+			if err != nil {
+				return err
+			}
 
-		for {
-			mem.Mutex.Lock()
+			qb, err := t.CreateBucketIfNotExists([]byte(queue))
+			if err != nil {
+				return err
+			}
+
+			pc := pb.Cursor()
+			qc := qb.Cursor()
 
 			for k, v := pc.First(); k != nil; k, v = pc.Next() {
 				ptx, err := DeserializeTX(v)
@@ -119,11 +121,17 @@ func (mem *Mempool) Queue() error {
 				return qb.Put(ptx.ID, serial)
 			}
 
-			mem.Mutex.Unlock()
+			return nil
+		})
 
-			time.Sleep(time.Second)
+		mem.Mutex.Unlock()
+
+		if err != nil {
+			break
 		}
-	})
+
+		time.Sleep(time.Second * 10)
+	}
 
 	return err
 }

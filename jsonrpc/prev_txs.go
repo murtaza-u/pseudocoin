@@ -7,17 +7,17 @@ import (
 	"github.com/murtaza-udaipurwala/pseudocoin/core"
 )
 
-type prevTXs struct {
-	PrevTXs map[string]core.Transaction `json:"prevTXs"`
+type PrevTXs struct {
+	PrevTXs map[string][]byte `json:"prevTXs"`
 }
 
-func (rpc *RPC) GetPrevTXs(r *http.Request, args *struct{ TX []byte }, resp *prevTXs) error {
+func (rpc *RPC) GetPrevTXs(r *http.Request, args *struct{ TX []byte }, resp *PrevTXs) error {
 	tx, err := core.DeserializeTX(args.TX)
 	if err != nil {
 		return err
 	}
 
-	prevTXs := make(map[string]core.Transaction)
+	prevTXs := make(map[string][]byte)
 
 	for _, in := range tx.Inputs {
 		prevTX, err := blockchain.FindTXByID(in.TxID)
@@ -25,7 +25,12 @@ func (rpc *RPC) GetPrevTXs(r *http.Request, args *struct{ TX []byte }, resp *pre
 			return err
 		}
 
-		prevTXs[hex.EncodeToString(in.TxID)] = prevTX
+		serial, err := prevTX.Serialize()
+		if err != nil {
+			return err
+		}
+
+		prevTXs[hex.EncodeToString(in.TxID)] = serial
 	}
 
 	resp.PrevTXs = prevTXs

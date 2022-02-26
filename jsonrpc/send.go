@@ -6,11 +6,11 @@ import (
 	"github.com/murtaza-udaipurwala/pseudocoin/core"
 )
 
-type send struct {
+type Send struct {
 	Msg string `json:"msg"`
 }
 
-func (rpc *RPC) Send(r *http.Request, args *struct{ TX []byte }, resp *send) error {
+func (rpc *RPC) Send(r *http.Request, args *struct{ TX []byte }, resp *Send) error {
 	tx, err := core.DeserializeTX(args.TX)
 	if err != nil {
 		return err

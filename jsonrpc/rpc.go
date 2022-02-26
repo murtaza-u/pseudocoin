@@ -18,7 +18,7 @@ var mempool core.Mempool
 
 type RPC struct{}
 
-func InitRPCServer(dbFile string, bc core.Blockchain, UTXOSet core.UTXOSet) error {
+func InitRPCServer(bc core.Blockchain, UTXOSet core.UTXOSet) error {
 	blockchain = bc
 	utxoset = UTXOSet
 

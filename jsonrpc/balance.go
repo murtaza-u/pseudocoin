@@ -8,12 +8,13 @@ import (
 	"github.com/murtaza-udaipurwala/pseudocoin/core"
 )
 
-type balance struct {
+type Balance struct {
 	Address string `json:"address"`
 	Balance uint   `json:"balance"`
 }
 
-func (rpc *RPC) GetBalance(r *http.Request, args *struct{ Address string }, resp *balance) error {
+func (rpc *RPC) GetBalance(r *http.Request, args *struct{ Address string }, resp *Balance) error {
+
 	if !core.ValidateAddress(args.Address) {
 		return errors.New("Invalid Address")
 	}

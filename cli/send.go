@@ -19,7 +19,7 @@ type txParams struct {
 }
 
 type prevTXs struct {
-	PrevTXs map[string]core.Transaction `json:"prevTXs"`
+	PrevTXs map[string][]byte `json:"prevTXs"`
 }
 
 type send struct {
@@ -31,57 +31,71 @@ func (cli *CLI) send(receiver, sender, senderPriv, senderPub string, amount uint
 		return nil, errors.New("Invalid address")
 	}
 
-	var privKey, pubKey []byte
+	var privKey, pubKey string
 	var err error
 
 	// private key
 	if fileExists(senderPriv) {
-		privKey, err = ioutil.ReadFile(senderPriv)
+		p, err := ioutil.ReadFile(senderPriv)
 		if err != nil {
 			return nil, err
 		}
+
+		privKey = string(p)
 	} else {
-		privKey = []byte(senderPriv)
+		privKey = senderPriv
 	}
 
 	// public key
 	if fileExists(senderPub) {
-		pubKey, err = ioutil.ReadFile(senderPub)
+		p, err := ioutil.ReadFile(senderPub)
 		if err != nil {
 			return nil, err
 		}
+
+		pubKey = string(p)
 	} else {
-		pubKey = []byte(senderPub)
+		pubKey = senderPub
 	}
 
 	w := core.Wallet{}
-	w.DecodePrivKeys(string(privKey))
+	w.DecodePrivKeys(privKey)
 
-	var newTx tx
+	var newTX tx
 	err = cli.rpcCall("RPC.NewTX", &txParams{
 		Sender:       sender,
 		Receiver:     receiver,
-		SenderPubKey: string(pubKey),
+		SenderPubKey: pubKey,
 		Amount:       amount,
-	}, &newTx)
+	}, &newTX)
+	if err != nil {
+		return nil, err
+	}
+
+	transaction, err := core.DeserializeTX(newTX.TX)
 	if err != nil {
 		return nil, err
 	}
 
 	var prevTXs prevTXs
 	err = cli.rpcCall("RPC.GetPrevTXs", &tx{
-		TX: newTx.TX,
+		TX: newTX.TX,
 	}, &prevTXs)
 	if err != nil {
 		return nil, err
 	}
 
-	transaction, err := core.DeserializeTX(newTx.TX)
-	if err != nil {
-		return nil, err
+	ptx := make(map[string]core.Transaction)
+	for txID, serial := range prevTXs.PrevTXs {
+		tx, err := core.DeserializeTX(serial)
+		if err != nil {
+			return nil, err
+		}
+
+		ptx[txID] = tx
 	}
 
-	err = transaction.Sign(w.PrivKey, prevTXs.PrevTXs)
+	err = transaction.Sign(w.PrivKey, ptx)
 	if err != nil {
 		return nil, err
 	}

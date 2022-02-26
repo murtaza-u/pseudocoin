@@ -15,5 +15,5 @@ func (cli *CLI) startCentralNode(dbFile string) (interface{}, error) {
 	cli.UTXOSet = core.UTXOSet{Blockchain: &chain}
 	cli.UTXOSet.Reindex()
 
-	return nil, jsonrpc.InitRPCServer(dbFile, cli.Blockchain, cli.UTXOSet)
+	return nil, jsonrpc.InitRPCServer(cli.Blockchain, cli.UTXOSet)
 }

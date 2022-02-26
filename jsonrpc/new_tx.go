@@ -6,18 +6,18 @@ import (
 	"github.com/murtaza-udaipurwala/pseudocoin/core"
 )
 
-type newTX struct {
+type NewTX struct {
 	TX []byte `json:"tx"`
 }
 
-type newTXArgs struct {
+type NewTXArgs struct {
 	Sender       string `json:"sender"`
 	Receiver     string `json:"receiver"`
 	SenderPubKey string `json:"sender_pub_key"`
 	Amount       uint   `json:"amount"`
 }
 
-func (rpc *RPC) NewTX(r *http.Request, args *newTXArgs, resp *newTX) error {
+func (rpc *RPC) NewTX(r *http.Request, args *NewTXArgs, resp *NewTX) error {
 	w := core.Wallet{}
 	err := w.DecodePubKeys(args.SenderPubKey)
 	if err != nil {
