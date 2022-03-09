@@ -15,6 +15,7 @@ func (rpc *RPC) Send(r *http.Request, args *struct{ TX []byte }, resp *Send) err
 	if err != nil {
 		return err
 	}
+	defer bc.DB.Close()
 
 	tx, err := core.DeserializeTX(args.TX)
 	if err != nil {

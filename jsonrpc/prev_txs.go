@@ -16,6 +16,7 @@ func (rpc *RPC) GetPrevTXs(r *http.Request, args *struct{ TX []byte }, resp *Pre
 	if err != nil {
 		return err
 	}
+	defer bc.DB.Close()
 
 	tx, err := core.DeserializeTX(args.TX)
 	if err != nil {

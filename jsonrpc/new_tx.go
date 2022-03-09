@@ -22,6 +22,7 @@ func (rpc *RPC) NewTX(r *http.Request, args *NewTXArgs, resp *NewTX) error {
 	if err != nil {
 		return err
 	}
+	defer bc.DB.Close()
 
 	utxoset := core.UTXOSet{
 		Blockchain: bc,

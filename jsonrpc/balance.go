@@ -18,6 +18,7 @@ func (rpc *RPC) GetBalance(r *http.Request, args *struct{ Address string }, resp
 	if err != nil {
 		return err
 	}
+	defer bc.DB.Close()
 
 	utxoset := core.UTXOSet{
 		Blockchain: bc,

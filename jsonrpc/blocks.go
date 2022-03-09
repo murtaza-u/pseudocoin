@@ -35,6 +35,7 @@ func (rpc *RPC) GetBlocks(r *http.Request, args *struct{ Height uint }, resp *Bl
 	if err != nil {
 		return err
 	}
+	defer bc.DB.Close()
 
 	i := bc.Iterator()
 	height, err := getBlockHeight(bc)
