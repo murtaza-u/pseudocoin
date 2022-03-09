@@ -2,136 +2,70 @@ package core
 
 import (
 	"bytes"
-	"fmt"
-	"sync"
-	"time"
+	"errors"
 
 	"github.com/boltdb/bolt"
 )
 
-type Mempool struct {
-	Mutex      *sync.Mutex
-	Blockchain *Blockchain
-}
+const pool = "pool"
 
-const (
-	pending = "pending"
-	queue   = "queue"
-)
+func (bc *Blockchain) Add(tx Transaction) error {
+	valid, err := bc.VerifyTX(tx)
+	if err != nil {
+		return err
+	}
 
-func (mem *Mempool) Add(tx Transaction) error {
-	mem.Mutex.Lock()
+	if !valid {
+		return errors.New("invalid TX")
+	}
 
-	err := mem.Blockchain.DB.Update(func(t *bolt.Tx) error {
-		b, err := t.CreateBucketIfNotExists([]byte(pending))
-		if err != nil {
-			return err
+	serial, err := tx.Serialize()
+	if err != nil {
+		return err
+	}
+
+	err = bc.DB.Update(func(t *bolt.Tx) error {
+		b := t.Bucket([]byte(pool))
+		if b == nil {
+			b, err = t.CreateBucket([]byte(pool))
+			if err != nil {
+				return err
+			}
+
+			return b.Put(tx.ID, serial)
 		}
 
-		serial, err := tx.Serialize()
-		if err != nil {
-			return err
+		c := b.Cursor()
+
+		var referenced bool
+
+		for k, v := c.First(); k != nil; k, v = c.Next() {
+			ftx, err := DeserializeTX(v)
+			if err != nil {
+				return err
+			}
+
+		Work:
+			for _, in := range tx.Inputs {
+				for _, fin := range ftx.Inputs {
+					if bytes.Compare(in.TxID, fin.TxID) != 0 {
+						continue
+					}
+
+					if in.Out == fin.Out {
+						referenced = true
+						break Work
+					}
+				}
+			}
+		}
+
+		if referenced {
+			return errors.New("Invalid TX")
 		}
 
 		return b.Put(tx.ID, serial)
 	})
-
-	mem.Mutex.Unlock()
-
-	return err
-}
-
-func (mem *Mempool) Queue() error {
-	var err error
-
-	for {
-		mem.Mutex.Lock()
-
-		err = mem.Blockchain.DB.Update(func(t *bolt.Tx) error {
-			pb, err := t.CreateBucketIfNotExists([]byte(pending))
-			if err != nil {
-				return err
-			}
-
-			qb, err := t.CreateBucketIfNotExists([]byte(queue))
-			if err != nil {
-				return err
-			}
-
-			pc := pb.Cursor()
-			qc := qb.Cursor()
-
-			for k, v := pc.First(); k != nil; k, v = pc.Next() {
-				ptx, err := DeserializeTX(v)
-				if err != nil {
-					return err
-				}
-
-				valid, err := mem.Blockchain.VerifyTX(ptx)
-				if err != nil {
-					return err
-				}
-
-				if !valid {
-					if err := pc.Delete(); err != nil {
-						return err
-					}
-					continue
-				}
-
-				var referenced bool
-				for k, v := qc.First(); k != nil; k, v = qc.Next() {
-					qtx, err := DeserializeTX(v)
-					if err != nil {
-						return err
-					}
-
-				Work:
-					for _, pin := range ptx.Inputs {
-						for _, qin := range qtx.Inputs {
-							if bytes.Compare(pin.TxID, qin.TxID) != 0 {
-								continue
-							}
-
-							if pin.Out == qin.Out {
-								referenced = true
-								break Work
-							}
-						}
-					}
-				}
-
-				if referenced {
-					if err := pc.Delete(); err != nil {
-						return err
-					}
-					continue
-				}
-
-				if err := pc.Delete(); err != nil {
-					return err
-				}
-
-				serial, err := ptx.Serialize()
-				if err != nil {
-					return err
-				}
-
-				fmt.Printf("Adding block with ID: %x\n", ptx.ID)
-				return qb.Put(ptx.ID, serial)
-			}
-
-			return nil
-		})
-
-		mem.Mutex.Unlock()
-
-		if err != nil {
-			break
-		}
-
-		time.Sleep(time.Second * 10)
-	}
 
 	return err
 }
