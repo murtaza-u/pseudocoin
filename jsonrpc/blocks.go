@@ -10,8 +10,8 @@ type Blocks struct {
 	Blocks []core.Block `json:"blocks"`
 }
 
-func getBlockHeight() (uint, error) {
-	i := blockchain.Iterator()
+func getBlockHeight(bc *core.Blockchain) (uint, error) {
+	i := bc.Iterator()
 	var height uint
 
 	for {
@@ -31,8 +31,13 @@ func getBlockHeight() (uint, error) {
 }
 
 func (rpc *RPC) GetBlocks(r *http.Request, args *struct{ Height uint }, resp *Blocks) error {
-	i := blockchain.Iterator()
-	height, err := getBlockHeight()
+	bc, err := getBlockchain()
+	if err != nil {
+		return err
+	}
+
+	i := bc.Iterator()
+	height, err := getBlockHeight(bc)
 	if err != nil {
 		return err
 	}

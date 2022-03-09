@@ -12,6 +12,11 @@ type PrevTXs struct {
 }
 
 func (rpc *RPC) GetPrevTXs(r *http.Request, args *struct{ TX []byte }, resp *PrevTXs) error {
+	bc, err := getBlockchain()
+	if err != nil {
+		return err
+	}
+
 	tx, err := core.DeserializeTX(args.TX)
 	if err != nil {
 		return err
@@ -20,7 +25,7 @@ func (rpc *RPC) GetPrevTXs(r *http.Request, args *struct{ TX []byte }, resp *Pre
 	prevTXs := make(map[string][]byte)
 
 	for _, in := range tx.Inputs {
-		prevTX, err := blockchain.FindTXByID(in.TxID)
+		prevTX, err := bc.FindTXByID(in.TxID)
 		if err != nil {
 			return err
 		}

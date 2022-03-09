@@ -4,7 +4,6 @@ import (
 	"log"
 	"net/http"
 	"os"
-	"sync"
 
 	"github.com/gorilla/mux"
 	"github.com/gorilla/rpc"
@@ -12,20 +11,17 @@ import (
 	"github.com/murtaza-udaipurwala/pseudocoin/core"
 )
 
-var blockchain core.Blockchain
-var utxoset core.UTXOSet
-var mempool core.Mempool
-
 type RPC struct{}
 
-func InitRPCServer(bc core.Blockchain, UTXOSet core.UTXOSet) error {
-	blockchain = bc
-	utxoset = UTXOSet
+var dbFile string
 
-	mempool = core.Mempool{
-		Blockchain: &blockchain,
-		Mutex:      &sync.Mutex{},
-	}
+func getBlockchain() (*core.Blockchain, error) {
+	bc, err := core.NewBlockchain(dbFile)
+	return &bc, err
+}
+
+func InitRPCServer(file string) error {
+	dbFile = file
 
 	s := rpc.NewServer()
 	s.RegisterCodec(json.NewCodec(), "application/json")
@@ -38,8 +34,6 @@ func InitRPCServer(bc core.Blockchain, UTXOSet core.UTXOSet) error {
 	if len(port) == 0 {
 		port = "5000"
 	}
-
-	go mempool.Queue()
 
 	log.Printf("Listening on port :%s\n", port)
 	return http.ListenAndServe(":"+port, r)

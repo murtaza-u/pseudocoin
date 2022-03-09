@@ -18,8 +18,17 @@ type NewTXArgs struct {
 }
 
 func (rpc *RPC) NewTX(r *http.Request, args *NewTXArgs, resp *NewTX) error {
+	bc, err := getBlockchain()
+	if err != nil {
+		return err
+	}
+
+	utxoset := core.UTXOSet{
+		Blockchain: bc,
+	}
+
 	w := core.Wallet{}
-	err := w.DecodePubKeys(args.SenderPubKey)
+	err = w.DecodePubKeys(args.SenderPubKey)
 	if err != nil {
 		return err
 	}

@@ -14,6 +14,14 @@ type Balance struct {
 }
 
 func (rpc *RPC) GetBalance(r *http.Request, args *struct{ Address string }, resp *Balance) error {
+	bc, err := getBlockchain()
+	if err != nil {
+		return err
+	}
+
+	utxoset := core.UTXOSet{
+		Blockchain: bc,
+	}
 
 	if !core.ValidateAddress(args.Address) {
 		return errors.New("Invalid Address")

@@ -11,12 +11,17 @@ type Send struct {
 }
 
 func (rpc *RPC) Send(r *http.Request, args *struct{ TX []byte }, resp *Send) error {
+	bc, err := getBlockchain()
+	if err != nil {
+		return err
+	}
+
 	tx, err := core.DeserializeTX(args.TX)
 	if err != nil {
 		return err
 	}
 
-	err = mempool.Add(tx)
+	err = bc.Add(tx)
 	if err != nil {
 		return err
 	}
