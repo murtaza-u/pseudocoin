@@ -136,7 +136,7 @@ func (bc *Blockchain) VerifyTX(tx Transaction) (bool, error) {
 			return false, err
 		}
 
-		prevTXs[hex.EncodeToString(in.TxID)] = prevTX
+		prevTXs[hex.EncodeToString(prevTX.ID)] = prevTX
 	}
 
 	return tx.Verify(prevTXs)
@@ -155,7 +155,7 @@ func (bc *Blockchain) SignTX(tx Transaction, privKey ecdsa.PrivateKey) error {
 			return err
 		}
 
-		prevTXs[hex.EncodeToString(in.TxID)] = prevTX
+		prevTXs[hex.EncodeToString(prevTX.ID)] = prevTX
 	}
 
 	return tx.Sign(privKey, prevTXs)

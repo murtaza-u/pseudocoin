@@ -30,7 +30,7 @@ func (rpc *RPC) GetPrevTXs(r *http.Request, args *struct{ TX []byte }, resp *Pre
 			return err
 		}
 
-		prevTXs[hex.EncodeToString(in.TxID)] = serial
+		prevTXs[hex.EncodeToString(prevTX.ID)] = serial
 	}
 
 	resp.PrevTXs = prevTXs
