@@ -125,20 +125,15 @@ func (tx *Transaction) Sign(privKey ecdsa.PrivateKey, prevTXs map[string]Transac
 		txCopy.Inputs[idx].Signature = nil // just incase.....
 		txCopy.Inputs[idx].PublicKey = prevTX.Outputs[in.Out].PubkeyHash
 
-		hash, err := txCopy.Hash()
-		if err != nil {
-			return err
-		}
+		dataToSign := fmt.Sprintf("%x\n", txCopy)
 
-		txCopy.ID = hash
-		txCopy.Inputs[idx].PublicKey = nil
-
-		r, s, err := ecdsa.Sign(rand.Reader, &privKey, txCopy.ID)
+		r, s, err := ecdsa.Sign(rand.Reader, &privKey, []byte(dataToSign))
 		if err != nil {
 			return err
 		}
 
 		tx.Inputs[idx].Signature = append(r.Bytes(), s.Bytes()...)
+		txCopy.Inputs[idx].PublicKey = nil
 	}
 
 	return nil
@@ -164,12 +159,6 @@ func (tx *Transaction) Verify(prevTXs map[string]Transaction) (bool, error) {
 		txCopy.Inputs[idx].Signature = nil // just incase.....
 		txCopy.Inputs[idx].PublicKey = prevTX.Outputs[in.Out].PubkeyHash
 
-		hash, err := txCopy.Hash()
-		if err != nil {
-			return false, err
-		}
-		txCopy.ID = hash
-
 		r := big.Int{}
 		s := big.Int{}
 		sigLen := len(in.Signature)
@@ -182,13 +171,15 @@ func (tx *Transaction) Verify(prevTXs map[string]Transaction) (bool, error) {
 		x.SetBytes(in.PublicKey[:(keyLen / 2)])
 		y.SetBytes(in.PublicKey[(keyLen / 2):])
 
+		dataToVerify := fmt.Sprintf("%x\n", txCopy)
+
 		rawPubKey := ecdsa.PublicKey{
 			Curve: curve,
 			X:     &x,
 			Y:     &y,
 		}
 
-		if !ecdsa.Verify(&rawPubKey, txCopy.ID, &r, &s) {
+		if !ecdsa.Verify(&rawPubKey, []byte(dataToVerify), &r, &s) {
 			return false, nil
 		}
 
@@ -254,6 +245,5 @@ func NewUTXOTransaction(receiver, sender string, senderPubKey []byte, amount uin
 		return Transaction{}, err
 	}
 
-	// UTXOSet.Blockchain.SignTX(tx, wallet.PrivKey)
 	return tx, nil
 }
