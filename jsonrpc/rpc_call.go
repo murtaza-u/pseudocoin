@@ -1,4 +1,4 @@
-package cli
+package jsonrpc
 
 import (
 	"bytes"
@@ -7,7 +7,9 @@ import (
 	"github.com/gorilla/rpc/json"
 )
 
-func (cli *CLI) rpcCall(method string, params interface{}, out interface{}) error {
+const URL = "http://localhost:5000/rpc"
+
+func RPCCall(method string, params interface{}, out interface{}) error {
 	msg, err := json.EncodeClientRequest(method, params)
 	if err != nil {
 		return err

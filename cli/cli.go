@@ -15,8 +15,6 @@ type CLI struct {
 	Config     config
 }
 
-const URL = "http://localhost:5000/rpc"
-
 func NewCLI() CLI {
 	return CLI{}
 }
