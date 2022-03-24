@@ -5,25 +5,14 @@ import (
 	"io/ioutil"
 
 	"github.com/murtaza-udaipurwala/pseudocoin/core"
+	"github.com/murtaza-udaipurwala/pseudocoin/jsonrpc"
 )
-
-type tx struct {
-	TX []byte `json:"tx"`
-}
 
 type txParams struct {
 	Sender       string `json:"sender"`
 	Receiver     string `json:"receiver"`
 	SenderPubKey string `json:"sender_pub_key"`
 	Amount       uint   `json:"amount"`
-}
-
-type prevTXs struct {
-	PrevTXs map[string][]byte `json:"prevTXs"`
-}
-
-type send struct {
-	Msg string `json:"msg"`
 }
 
 func (cli *CLI) send(receiver, sender, senderPriv, senderPub string, amount uint) (interface{}, error) {
@@ -61,7 +50,7 @@ func (cli *CLI) send(receiver, sender, senderPriv, senderPub string, amount uint
 	w := core.Wallet{}
 	w.DecodePrivKeys(privKey)
 
-	var newTX tx
+	var newTX jsonrpc.NewTX
 	err = cli.rpcCall("RPC.NewTX", &txParams{
 		Sender:       sender,
 		Receiver:     receiver,
@@ -77,8 +66,8 @@ func (cli *CLI) send(receiver, sender, senderPriv, senderPub string, amount uint
 		return nil, err
 	}
 
-	var prevTXs prevTXs
-	err = cli.rpcCall("RPC.GetPrevTXs", &tx{
+	var prevTXs jsonrpc.PrevTXs
+	err = cli.rpcCall("RPC.GetPrevTXs", &jsonrpc.NewTX{
 		TX: newTX.TX,
 	}, &prevTXs)
 	if err != nil {
@@ -105,8 +94,8 @@ func (cli *CLI) send(receiver, sender, senderPriv, senderPub string, amount uint
 		return nil, err
 	}
 
-	var send send
-	err = cli.rpcCall("RPC.Send", &tx{
+	var send jsonrpc.Send
+	err = cli.rpcCall("RPC.Send", &jsonrpc.NewTX{
 		TX: serial,
 	}, &send)
 	if err != nil {

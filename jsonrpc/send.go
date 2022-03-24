@@ -22,7 +22,7 @@ func (rpc *RPC) Send(r *http.Request, args *struct{ TX []byte }, resp *Send) err
 		return err
 	}
 
-	err = bc.Add(tx)
+	err = bc.AddToPool(tx)
 	if err != nil {
 		return err
 	}

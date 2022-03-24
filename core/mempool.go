@@ -9,7 +9,7 @@ import (
 
 const pool = "pool"
 
-func (bc *Blockchain) Add(tx Transaction) error {
+func (bc *Blockchain) AddToPool(tx Transaction) error {
 	valid, err := bc.VerifyTX(tx)
 	if err != nil {
 		return err

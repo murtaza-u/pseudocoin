@@ -4,12 +4,8 @@ import (
 	"errors"
 
 	"github.com/murtaza-udaipurwala/pseudocoin/core"
+	"github.com/murtaza-udaipurwala/pseudocoin/jsonrpc"
 )
-
-type balance struct {
-	Address string `json:"address"`
-	Balance uint   `json:"balance"`
-}
 
 type balanceParams struct {
 	Address string `json:"address,omitempty"`
@@ -20,7 +16,7 @@ func (cli *CLI) getBalance(addr string) (interface{}, error) {
 		return nil, errors.New("Invalid address")
 	}
 
-	var balance balance
+	var balance jsonrpc.Balance
 
 	err := cli.rpcCall("RPC.GetBalance", &balanceParams{Address: addr}, &balance)
 	if err != nil {
