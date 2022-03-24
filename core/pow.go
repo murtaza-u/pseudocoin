@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"math"
 	"math/big"
-	"time"
 )
 
 type PoW struct {
@@ -30,7 +29,7 @@ func (pow *PoW) PrepareData(nonce uint64) ([]byte, error) {
 
 	targetBytes, err := IntToBytes(targetBits)
 	nonceBytes, err = IntToBytes(int64(nonce))
-	timeBytes, err = IntToBytes(time.Now().Unix())
+	timeBytes, err = IntToBytes(pow.Block.Timestamp)
 	if err != nil {
 		return nil, err
 	}
