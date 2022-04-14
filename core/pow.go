@@ -20,31 +20,39 @@ const (
 
 func NewPoW(b *Block) *PoW {
 	target := big.NewInt(1)
-	target = target.Lsh(target, 256-targetBits)
+	target = target.Lsh(target, uint(256-targetBits))
 	return &PoW{b, target}
 }
 
 func (pow *PoW) PrepareData(nonce uint64) ([]byte, error) {
 	var targetBytes, nonceBytes, timeBytes []byte
 
-	targetBytes, err := IntToBytes(targetBits)
+	targetBytes, err := IntToBytes(int64(targetBits))
+	if err != nil {
+		return nil, err
+	}
+
 	nonceBytes, err = IntToBytes(int64(nonce))
+	if err != nil {
+		return nil, err
+	}
+
 	timeBytes, err = IntToBytes(pow.Block.Timestamp)
 	if err != nil {
 		return nil, err
 	}
 
-	hashedTXs, err := pow.Block.HashTXs()
-	if err != nil {
-		return nil, err
-	}
+	// hashedTXs, err := pow.Block.HashTXs()
+	// if err != nil {
+	// 	return nil, err
+	// }
 
 	return bytes.Join([][]byte{
+		pow.Block.PrevBlockHash,
+		// hashedTXs,
+		timeBytes,
 		targetBytes,
 		nonceBytes,
-		timeBytes,
-		pow.Block.PrevBlockHash,
-		hashedTXs,
 	}, []byte{}), err
 }
 

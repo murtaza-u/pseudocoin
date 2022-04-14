@@ -18,7 +18,11 @@ func (cli *CLI) getBalance(addr string) (interface{}, error) {
 
 	var balance jsonrpc.Balance
 
-	err := cli.rpcCall("RPC.GetBalance", &balanceParams{Address: addr}, &balance)
+	err := jsonrpc.RPCCall(
+		"RPC.GetBalance",
+		&balanceParams{Address: addr},
+		&balance,
+	)
 	if err != nil {
 		return nil, err
 	}

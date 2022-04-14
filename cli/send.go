@@ -51,7 +51,7 @@ func (cli *CLI) send(receiver, sender, senderPriv, senderPub string, amount uint
 	w.DecodePrivKeys(privKey)
 
 	var newTX jsonrpc.NewTX
-	err = cli.rpcCall("RPC.NewTX", &txParams{
+	err = jsonrpc.RPCCall("RPC.NewTX", &txParams{
 		Sender:       sender,
 		Receiver:     receiver,
 		SenderPubKey: pubKey,
@@ -67,7 +67,7 @@ func (cli *CLI) send(receiver, sender, senderPriv, senderPub string, amount uint
 	}
 
 	var prevTXs jsonrpc.PrevTXs
-	err = cli.rpcCall("RPC.GetPrevTXs", &jsonrpc.NewTX{
+	err = jsonrpc.RPCCall("RPC.GetPrevTXs", &jsonrpc.NewTX{
 		TX: newTX.TX,
 	}, &prevTXs)
 	if err != nil {
@@ -95,7 +95,7 @@ func (cli *CLI) send(receiver, sender, senderPriv, senderPub string, amount uint
 	}
 
 	var send jsonrpc.Send
-	err = cli.rpcCall("RPC.Send", &jsonrpc.NewTX{
+	err = jsonrpc.RPCCall("RPC.Send", &jsonrpc.NewTX{
 		TX: serial,
 	}, &send)
 	if err != nil {

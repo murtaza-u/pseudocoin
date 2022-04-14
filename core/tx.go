@@ -32,7 +32,7 @@ func (tx Transaction) Hash() ([]byte, error) {
 func (tx Transaction) Serialize() ([]byte, error) {
 	var buff bytes.Buffer
 	encoder := gob.NewEncoder(&buff)
-	err := encoder.Encode(tx)
+	err := encoder.Encode(&tx)
 	return buff.Bytes(), err
 }
 

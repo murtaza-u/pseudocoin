@@ -7,6 +7,7 @@ import (
 	"path"
 
 	"github.com/murtaza-udaipurwala/pseudocoin/core"
+	"github.com/murtaza-udaipurwala/pseudocoin/miner"
 )
 
 type CLI struct {
@@ -67,6 +68,9 @@ func (cli *CLI) Run() (interface{}, error) {
 
 	poolCMD := flag.NewFlagSet("pool", flag.ExitOnError)
 
+	mineCMD := flag.NewFlagSet("mine", flag.ExitOnError)
+	mineCMDAddr := mineCMD.String("addr", "", "miner's address")
+
 	flag.Parse()
 	cli.Config.load(*configFile)
 
@@ -91,6 +95,9 @@ func (cli *CLI) Run() (interface{}, error) {
 
 	case "pool":
 		err = poolCMD.Parse(os.Args[2:])
+
+	case "mine":
+		err = mineCMD.Parse(os.Args[2:])
 	}
 
 	if err != nil {
@@ -139,6 +146,13 @@ func (cli *CLI) Run() (interface{}, error) {
 
 	if poolCMD.Parsed() {
 		return cli.getPool()
+	}
+
+	if mineCMD.Parsed() {
+		if len(*mineCMDAddr) != 0 {
+			miner.Start(*mineCMDAddr)
+			os.Exit(1)
+		}
 	}
 
 	return nil, errors.New("Invalid arguments")

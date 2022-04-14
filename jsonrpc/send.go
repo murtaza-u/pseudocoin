@@ -27,6 +27,6 @@ func (rpc *RPC) Send(r *http.Request, args *struct{ TX []byte }, resp *Send) err
 		return err
 	}
 
-	resp.Msg = "Block added to the mempool"
+	resp.Msg = "TX added to the mempool"
 	return nil
 }

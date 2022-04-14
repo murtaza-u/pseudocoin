@@ -1,6 +1,9 @@
 package jsonrpc
 
-import "net/http"
+import (
+	"log"
+	"net/http"
+)
 
 type PrevHash struct {
 	Hash []byte `json:"prev_hash"`
@@ -13,6 +16,8 @@ func (rpc *RPC) GetPrevBlockHash(r *http.Request, args *struct{}, resp *PrevHash
 	}
 	defer bc.DB.Close()
 
-	resp.Hash = bc.Tip
+	log.Printf("tip: %x\n", bc.Tip)
+
+	resp.Hash = append(resp.Hash, bc.Tip...)
 	return nil
 }

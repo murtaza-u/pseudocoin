@@ -12,7 +12,7 @@ type poolParams struct{}
 func (cli *CLI) getPool() (interface{}, error) {
 	var pool jsonrpc.Pool
 
-	err := cli.rpcCall("RPC.GetPool", &poolParams{}, &pool)
+	err := jsonrpc.RPCCall("RPC.GetPool", &poolParams{}, &pool)
 	if err != nil {
 		return nil, err
 	}
