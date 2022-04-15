@@ -97,6 +97,8 @@ func report(b *core.Block) error {
 }
 
 func Start(addr string) {
+	log.Printf("mining addres: %s\n", addr)
+
 	start := func() error {
 		txs, err := getTXs()
 		if err != nil {
@@ -122,6 +124,6 @@ func Start(addr string) {
 			log.Println("error:", err)
 		}
 
-		time.Sleep(time.Second * 10)
+		time.Sleep(time.Minute * 5)
 	}
 }

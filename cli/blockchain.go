@@ -11,16 +11,12 @@ type blockchain struct {
 	DBFile  string `json:"dbfile"`
 }
 
-func (cli *CLI) createBlockchain(dbFile string) (interface{}, error) {
-	if len(cli.Config.Address) == 0 {
-		return nil, errors.New("Please provide node's address in config.json")
+func (cli *CLI) createBlockchain(dbFile, addr string) (interface{}, error) {
+	if !core.ValidateAddress(addr) {
+		return nil, errors.New("invalid address provided")
 	}
 
-	if !core.ValidateAddress(cli.Config.Address) {
-		return nil, errors.New("Invalid address provided in config.json")
-	}
-
-	chain, err := core.CreateBlockchain(cli.Config.Address, dbFile)
+	chain, err := core.CreateBlockchain(addr, dbFile)
 	if err != nil {
 		return nil, err
 	}
@@ -32,7 +28,7 @@ func (cli *CLI) createBlockchain(dbFile string) (interface{}, error) {
 	cli.UTXOSet.Reindex()
 
 	return blockchain{
-		Address: cli.Config.Address,
+		Address: addr,
 		DBFile:  dbFile,
 	}, nil
 }

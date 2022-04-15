@@ -4,7 +4,6 @@ import (
 	"errors"
 	"flag"
 	"os"
-	"path"
 
 	"github.com/murtaza-udaipurwala/pseudocoin/core"
 	"github.com/murtaza-udaipurwala/pseudocoin/miner"
@@ -13,7 +12,6 @@ import (
 type CLI struct {
 	Blockchain core.Blockchain
 	UTXOSet    core.UTXOSet
-	Config     config
 }
 
 func NewCLI() CLI {
@@ -35,12 +33,6 @@ func (cli *CLI) Run() (interface{}, error) {
 	}
 
 	createHome()
-	home, err := getHome()
-	if err != nil {
-		return nil, err
-	}
-
-	configFile := flag.String("config", path.Join(home, "config.json"), "Path to the config file")
 
 	walletCMD := flag.NewFlagSet("wallet", flag.ExitOnError)
 	walletCMDCreate := walletCMD.Bool("create", false, "Create a new wallet")
@@ -52,6 +44,7 @@ func (cli *CLI) Run() (interface{}, error) {
 
 	blockchainCMD := flag.NewFlagSet("blockchain", flag.ExitOnError)
 	blockchainCMDCreate := blockchainCMD.String("create", "", "Create a new blockchain")
+	blockchainCMDAddr := blockchainCMD.String("address", "", "address of central node")
 
 	centralNodeCMD := flag.NewFlagSet("centralnode", flag.ExitOnError)
 	centralNodeCMDStart := centralNodeCMD.String("start", "", "Path to blockchain DB")
@@ -74,7 +67,6 @@ func (cli *CLI) Run() (interface{}, error) {
 	webCMD := flag.NewFlagSet("web", flag.ExitOnError)
 
 	flag.Parse()
-	cli.Config.load(*configFile)
 
 	switch os.Args[1] {
 	case "wallet":
@@ -126,8 +118,8 @@ func (cli *CLI) Run() (interface{}, error) {
 	}
 
 	if blockchainCMD.Parsed() {
-		if len(*blockchainCMDCreate) != 0 {
-			return cli.createBlockchain(*blockchainCMDCreate)
+		if len(*blockchainCMDCreate) != 0 && len(*blockchainCMDAddr) != 0 {
+			return cli.createBlockchain(*blockchainCMDCreate, *blockchainCMDAddr)
 		}
 	}
 
