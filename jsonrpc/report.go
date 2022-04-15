@@ -117,5 +117,6 @@ func (rpc *RPC) ReportBlock(r *http.Request, args *ReportParams, resp *Report) e
 	}
 
 	resp.Msg = "block added to the blockchain"
+	log.Printf("%s: [%x]", resp.Msg, block.Hash)
 	return nil
 }

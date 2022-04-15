@@ -1,6 +1,7 @@
 package jsonrpc
 
 import (
+	"log"
 	"net/http"
 
 	"github.com/murtaza-udaipurwala/pseudocoin/core"
@@ -28,5 +29,7 @@ func (rpc *RPC) Send(r *http.Request, args *struct{ TX []byte }, resp *Send) err
 	}
 
 	resp.Msg = "TX added to the mempool"
+	log.Printf("%s: [%x]", resp.Msg, tx.ID)
+
 	return nil
 }

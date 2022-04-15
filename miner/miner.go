@@ -58,13 +58,11 @@ func getPrevHash() ([]byte, error) {
 func mine(addr string, txs []*core.Transaction) (*core.Block, error) {
 	prevHash, err := getPrevHash()
 	if err != nil {
-		log.Panic(err)
 		return nil, err
 	}
 
 	cbtx, err := core.NewCBTX(addr, "")
 	if err != nil {
-		log.Panic(err)
 		return nil, err
 	}
 
@@ -72,7 +70,6 @@ func mine(addr string, txs []*core.Transaction) (*core.Block, error) {
 
 	b, err := core.NewBlock(txs, prevHash)
 	if err != nil {
-		log.Panic(err)
 		return nil, err
 	}
 
@@ -128,42 +125,3 @@ func Start(addr string) {
 		time.Sleep(time.Second * 10)
 	}
 }
-
-// func Start(addr string) {
-// 	dur := time.Now().Add(time.Second * 5)
-
-// 	start := func() error {
-// 		txs, err := getTXs()
-// 		if err != nil {
-// 			return err
-// 		}
-
-// 		if len(txs) == 0 {
-// 			dur = time.Now().Add(time.Second * 5)
-// 			return nil
-// 		}
-
-// 		if len(txs) < 2 && time.Now().Sub(dur) < 0 {
-// 			return nil
-// 		}
-
-// 		dur = time.Now().Add(time.Second * 5)
-
-// 		b, err := mine(addr, txs)
-// 		if err != nil {
-// 			return err
-// 		}
-
-// 		err = report(b)
-// 		return err
-// 	}
-
-// 	for {
-// 		err := start()
-// 		if err != nil {
-// 			log.Println("error:", err)
-// 		}
-
-// 		time.Sleep(time.Second * 10)
-// 	}
-// }

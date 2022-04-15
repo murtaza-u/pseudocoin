@@ -429,14 +429,7 @@ const send = (amount, recv) => {
     }
 
     fetch(sendURL, options)
-        .then(resp => {
-            if (!resp.ok) {
-                showAlert("A network error occured", "danger");
-                return;
-            }
-
-            return resp.json();
-        })
+        .then(resp => resp.json())
         .then(data => {
             if (data === undefined) {
                 return;
