@@ -1,8 +1,10 @@
-const getBlockURL = "http://localhost:3000/getblocks/?ht=0";
-const createWalletURL = "http://localhost:3000/createwallet";
-const getAddressURL = "http://localhost:3000/getaddress?pub=";
-const getBalanceURL = "http://localhost:3000/getbalance?addr=";
-const sendURL = "http://localhost:3000/send";
+const baseURL = location.protocol + "//" + location.hostname + ":" + location.port
+
+const getBlockURL = baseURL + "/getblocks/?ht=0";
+const createWalletURL = baseURL + "/createwallet";
+const getAddressURL = baseURL + "/getaddress?pub=";
+const getBalanceURL = baseURL + "/getbalance?addr=";
+const sendURL = baseURL + "/send";
 
 const account = document.getElementById("account");
 const def = document.getElementById("default");
