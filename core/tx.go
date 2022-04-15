@@ -11,6 +11,7 @@ import (
 	"errors"
 	"fmt"
 	"math/big"
+	"strings"
 )
 
 type Transaction struct {
@@ -190,6 +191,10 @@ func (tx *Transaction) Verify(prevTXs map[string]Transaction) (bool, error) {
 }
 
 func NewUTXOTransaction(receiver, sender string, senderPubKey []byte, amount uint, UTXOSet *UTXOSet) (Transaction, error) {
+	if strings.Compare(receiver, sender) == 0 {
+		return Transaction{}, errors.New("receiver cannot be equal to sender")
+	}
+
 	pubKeyHash, err := HashPubKey(senderPubKey)
 	if err != nil {
 		return Transaction{}, err
