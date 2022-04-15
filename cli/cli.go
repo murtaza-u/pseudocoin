@@ -71,6 +71,8 @@ func (cli *CLI) Run() (interface{}, error) {
 	mineCMD := flag.NewFlagSet("mine", flag.ExitOnError)
 	mineCMDAddr := mineCMD.String("addr", "", "miner's address")
 
+	webCMD := flag.NewFlagSet("web", flag.ExitOnError)
+
 	flag.Parse()
 	cli.Config.load(*configFile)
 
@@ -98,6 +100,9 @@ func (cli *CLI) Run() (interface{}, error) {
 
 	case "mine":
 		err = mineCMD.Parse(os.Args[2:])
+
+	case "web":
+		err = webCMD.Parse(os.Args[2:])
 	}
 
 	if err != nil {
@@ -153,6 +158,11 @@ func (cli *CLI) Run() (interface{}, error) {
 			miner.Start(*mineCMDAddr)
 			os.Exit(1)
 		}
+	}
+
+	if webCMD.Parsed() {
+		cli.web()
+		os.Exit(1)
 	}
 
 	return nil, errors.New("Invalid arguments")
