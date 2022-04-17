@@ -249,6 +249,7 @@ loadBtn.addEventListener("click", () => {
 
     if (inputFile.files.length === 0) {
         showAlert("no file selected", "info");
+        loadBtn.disabled = false;
         return;
     }
 
@@ -337,8 +338,13 @@ const loadDefaultPage = () => {
 
             count = data["blocks"].blocks.length;
 
+            try {
+                document.getElementById("more").remove();
+                document.getElementById("more").remove();
+            } catch(e) {}
+
             if (parseInt(data["count"]) > 10) {
-                btn = document.createElement("button");
+                const btn = document.createElement("button");
                 btn.textContent = "Load More";
                 btn.className = "btn btn-secondary m-3";
                 btn.id = "more";
@@ -524,9 +530,12 @@ document.getElementById("logout").addEventListener("click", () => {
     loadDefaultPage();
 });
 
-document.getElementById("home").addEventListener("click", () => {
-    loadDefaultPage();
-});
+const homeBtns = document.getElementsByClassName("home");
+for (let i = 0; i < homeBtns.length; i ++) {
+    homeBtns[i].addEventListener("click", () => {
+        loadDefaultPage();
+    });
+}
 
 const listenOnMore = () => {
     more = document.getElementById("more");
