@@ -13,37 +13,50 @@ type UTXOSet struct {
 
 const utxoBucket = "utxo"
 
-func (u *UTXOSet) Reindex() error {
+func (u UTXOSet) Reindex() error {
 	db := u.Blockchain.DB
+	bucketName := []byte(utxoBucket)
 
-	utxos, err := u.Blockchain.FindUXTOs()
-	if err != nil {
-		return err
-	}
-
-	err = db.Update(func(t *bolt.Tx) error {
-		err := t.DeleteBucket([]byte(utxoBucket))
+	err := db.Update(func(tx *bolt.Tx) error {
+		err := tx.DeleteBucket(bucketName)
 		if err != nil && err != bolt.ErrBucketNotFound {
 			return err
 		}
 
-		b, err := t.CreateBucket([]byte(utxoBucket))
+		_, err = tx.CreateBucket(bucketName)
 		if err != nil {
 			return err
 		}
 
-		for txid, outs := range utxos {
-			key, err := hex.DecodeString(txid)
+		return nil
+	})
+	if err != nil {
+		return err
+	}
+
+	UTXO, err := u.Blockchain.FindUXTOs()
+	if err != nil {
+		return err
+	}
+
+	err = db.Update(func(tx *bolt.Tx) error {
+		b := tx.Bucket(bucketName)
+
+		for txID, outs := range UTXO {
+			key, err := hex.DecodeString(txID)
 			if err != nil {
 				return err
 			}
 
-			serializedOuts, err := outs.Serialize()
+			serial, err := outs.Serialize()
 			if err != nil {
 				return err
 			}
 
-			b.Put(key, serializedOuts)
+			err = b.Put(key, serial)
+			if err != nil {
+				return err
+			}
 		}
 
 		return nil
@@ -52,43 +65,46 @@ func (u *UTXOSet) Reindex() error {
 	return err
 }
 
-func (u *UTXOSet) Update(block Block) error {
+func (u UTXOSet) Update(block *Block) error {
 	db := u.Blockchain.DB
 
-	err := db.Update(func(t *bolt.Tx) error {
-		b := t.Bucket([]byte(utxoBucket))
+	err := db.Update(func(tx *bolt.Tx) error {
+		b := tx.Bucket([]byte(utxoBucket))
 
 		for _, tx := range block.Transactions {
-			if !tx.IsCoinbase() {
-				for _, in := range tx.Inputs {
-					updatedOutputs := TXOutputs{}
-					outs, err := DeserializeOutputs(b.Get(in.TxID))
+			if tx.IsCoinbase() == false {
+				for _, vin := range tx.Inputs {
+					updatedOuts := TXOutputs{}
+					outsBytes := b.Get(vin.TxID)
+					outs, err := DeserializeOutputs(outsBytes)
+
 					if err != nil {
 						return err
 					}
 
-					for outIDX, out := range outs.Outputs {
-						if outIDX == in.Out {
-							updatedOutputs.Outputs = append(updatedOutputs.Outputs, out)
+					for outIdx, out := range outs.Outputs {
+						if outIdx != vin.Out {
+							updatedOuts.Outputs = append(updatedOuts.Outputs, out)
 						}
 					}
 
-					if len(updatedOutputs.Outputs) == 0 {
-						err = b.Delete(in.TxID)
+					if len(updatedOuts.Outputs) == 0 {
+						err := b.Delete(vin.TxID)
 						if err != nil {
 							return err
 						}
 					} else {
-						serial, err := updatedOutputs.Serialize()
+						serial, err := updatedOuts.Serialize()
 						if err != nil {
 							return err
 						}
 
-						err = b.Put(in.TxID, serial)
+						err = b.Put(vin.TxID, serial)
 						if err != nil {
 							return err
 						}
 					}
+
 				}
 			}
 
