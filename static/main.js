@@ -8,8 +8,10 @@ const sendURL = baseURL + "/send";
 
 const account = document.getElementById("account");
 const def = document.getElementById("default");
+const balancePage = document.getElementById("balance-page");
 
 const blocks = document.getElementById("blocks");
+const checkBalanceVal = document.getElementById("check-balance-value");
 
 let count = 0;
 
@@ -281,8 +283,10 @@ loadBtn.addEventListener("click", () => {
 
 const loadDefaultPage = () => {
     clearAllAlerts();
+
     account.style.display = "none";
     def.style.display = "block";
+    balancePage.style.display = "none";
 
     try {
         document.getElementById("login").remove();
@@ -367,6 +371,7 @@ const loadBalance = (addr, input) => {
             }
 
             input.textContent = data["balance"];
+            input.style.display = "block";
         })
         .catch(err => console.log(err))
 }
@@ -378,8 +383,10 @@ const cookAccount = addr => {
 
 const loadAccountPage = pub => {
     clearAllAlerts();
+
     account.style.display = "block";
     def.style.display = "none";
+    balancePage.style.display = "none";
 
     fetch(getAddressURL + pub, {
         method: "GET",
@@ -569,3 +576,96 @@ const listenOnMore = () => {
             });
     });
 }
+
+const loadCheckBalancePage = () => {
+    clearAllAlerts();
+
+    account.style.display = "none";
+    def.style.display = "none";
+    balancePage.style.display = "block";
+
+    try {
+        document.getElementById("login").remove();
+    } catch(e) {}
+
+    const { pub, priv } = get();
+    if (pub !== null && priv !== null) {
+        const nav = document.querySelector("#default nav");
+
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "btn btn-secondary";
+        btn.id = "login";
+        btn.textContent = "Login"
+
+        nav.appendChild(btn);
+
+        btn.addEventListener("click", () => {
+            loadAccountPage(pub);
+        });
+    }
+
+    fetch(getBlockURL + "?maxht=10", {
+        method: "GET",
+    })
+        .then((resp) => {
+            if (!resp.ok) {
+                return;
+            }
+
+            return resp.json();
+        })
+        .then((data) => {
+            if (data === undefined) {
+                return;
+            }
+
+            if (!data.successful) {
+                console.log(data["error"]);
+                return;
+            }
+
+            blocks.innerHTML = null;
+
+            data["blocks"].blocks.forEach((b) => {
+                cookBlocks(b);
+            });
+
+            count = data["blocks"].blocks.length;
+
+            if (parseInt(data["count"]) > 10) {
+                btn = document.createElement("button");
+                btn.textContent = "Load More";
+                btn.className = "btn btn-secondary m-3";
+                btn.id = "more";
+                def.appendChild(btn);
+                listenOnMore();
+            }
+        })
+        .catch((err) => console.log(err));
+}
+
+document.getElementById("check-balance").addEventListener("click", () => {
+    loadCheckBalancePage()
+});
+
+(function () {
+    'use strict'
+
+    const form = document.querySelector("#balance-page form");
+    const input = document.getElementById("input-check-balance");
+
+    form.addEventListener("submit", e => {
+        e.preventDefault()
+
+        if (!form.checkValidity()) {
+            e.stopPropagation()
+            form.classList.add('was-validated')
+            return;
+        }
+
+        const addr = input.value;
+
+        loadBalance(addr, checkBalanceVal);
+    }, false);
+})()
