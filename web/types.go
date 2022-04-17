@@ -25,8 +25,9 @@ type txParams struct {
 	Amount       uint   `json:"amount"`
 }
 
-type blockParams struct {
-	Height uint `json:"height"`
+type BlockQuery struct {
+	MaxHT uint
+	MinHt uint
 }
 
 var ErrInvalidPubKey = errors.New("invalid public key")

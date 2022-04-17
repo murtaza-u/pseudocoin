@@ -1,6 +1,7 @@
 package jsonrpc
 
 import (
+	"errors"
 	"net/http"
 
 	"github.com/murtaza-udaipurwala/pseudocoin/core"
@@ -8,6 +9,7 @@ import (
 
 type Blocks struct {
 	Blocks []core.Block `json:"blocks"`
+	Count  uint         `json:"count"`
 }
 
 func getBlockHeight(bc *core.Blockchain) (uint, error) {
@@ -30,18 +32,30 @@ func getBlockHeight(bc *core.Blockchain) (uint, error) {
 	return height, nil
 }
 
-func (rpc *RPC) GetBlocks(r *http.Request, args *struct{ Height uint }, resp *Blocks) error {
+func (rpc *RPC) GetBlocks(r *http.Request, args *struct{ MaxHT, MinHT uint }, resp *Blocks) error {
+	if args.MaxHT < args.MinHT {
+		return errors.New("max height cannot be less than min height")
+	}
+
 	bc, err := getBlockchain()
 	if err != nil {
 		return err
 	}
 	defer bc.DB.Close()
 
-	i := bc.Iterator()
-	height, err := getBlockHeight(bc)
+	count, err := getBlockHeight(bc)
 	if err != nil {
 		return err
 	}
+
+	resp.Count = count
+
+	i := bc.Iterator()
+	if err != nil {
+		return err
+	}
+
+	var idx uint
 
 	for {
 		b, err := i.Next()
@@ -49,12 +63,17 @@ func (rpc *RPC) GetBlocks(r *http.Request, args *struct{ Height uint }, resp *Bl
 			return err
 		}
 
-		if b == nil || args.Height >= height {
+		if b == nil || args.MaxHT < idx {
 			break
 		}
 
+		if idx < args.MinHT {
+			idx++
+			continue
+		}
+
 		resp.Blocks = append(resp.Blocks, *b)
-		height--
+		idx++
 	}
 
 	return nil

@@ -104,11 +104,11 @@ func (s *Service) Send(r *Send, sender string) (*jsonrpc.Send, error) {
 	return &send, nil
 }
 
-func (s *Service) GetBlocks(ht uint) (*jsonrpc.Blocks, error) {
+func (s *Service) GetBlocks(q *BlockQuery) (*jsonrpc.Blocks, error) {
 	var blocks jsonrpc.Blocks
 	err := jsonrpc.RPCCall(
 		"RPC.GetBlocks",
-		&blockParams{ht},
+		q,
 		&blocks,
 	)
 	if err != nil {

@@ -1,8 +1,6 @@
 package web
 
 import (
-	"strconv"
-
 	"github.com/gofiber/fiber/v2"
 	"github.com/murtaza-udaipurwala/pseudocoin/core"
 	"github.com/murtaza-udaipurwala/pseudocoin/jsonrpc"
@@ -12,7 +10,7 @@ type IService interface {
 	CreateWallet() (*Wallet, error)
 	GetBalance(string) (*jsonrpc.Balance, error)
 	Send(*Send, string) (*jsonrpc.Send, error)
-	GetBlocks(uint) (*jsonrpc.Blocks, error)
+	GetBlocks(*BlockQuery) (*jsonrpc.Blocks, error)
 	GetAddress(string) (string, error)
 }
 
@@ -113,7 +111,9 @@ func (c *Controller) Send(ctx *fiber.Ctx) error {
 }
 
 func (c *Controller) GetBlocks(ctx *fiber.Ctx) error {
-	ht, err := strconv.Atoi(ctx.Query("ht", "0"))
+	q := new(BlockQuery)
+	err := ctx.QueryParser(q)
+
 	if err != nil {
 		return ctx.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"successful": false,
@@ -121,7 +121,7 @@ func (c *Controller) GetBlocks(ctx *fiber.Ctx) error {
 		})
 	}
 
-	b, err := c.s.GetBlocks(uint(ht))
+	b, err := c.s.GetBlocks(q)
 	if err != nil {
 		return ctx.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"successful": false,
@@ -131,6 +131,7 @@ func (c *Controller) GetBlocks(ctx *fiber.Ctx) error {
 
 	return ctx.Status(fiber.StatusOK).JSON(fiber.Map{
 		"successful": true,
+		"count":      b.Count,
 		"blocks":     b,
 	})
 }

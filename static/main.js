@@ -1,6 +1,6 @@
 const baseURL = location.protocol + "//" + location.hostname + ":" + location.port
 
-const getBlockURL = baseURL + "/getblocks/?ht=0";
+const getBlockURL = baseURL + "/getblocks/";
 const createWalletURL = baseURL + "/createwallet";
 const getAddressURL = baseURL + "/getaddress?pub=";
 const getBalanceURL = baseURL + "/getbalance?addr=";
@@ -10,6 +10,8 @@ const account = document.getElementById("account");
 const def = document.getElementById("default");
 
 const blocks = document.getElementById("blocks");
+
+let count = 0;
 
 const showAlert = (msg, type) => {
     const alert = document.createElement("div");
@@ -203,6 +205,8 @@ const get = () => {
 }
 
 createBtn.addEventListener("click", () => {
+    createBtn.disabled = true;
+
     fetch(createWalletURL, {
         method: "GET",
     })
@@ -215,10 +219,12 @@ createBtn.addEventListener("click", () => {
         })
         .then(data => {
             if (data === undefined) {
+                createBtn.disabled = false;
                 return;
             }
 
             if (!data.successful) {
+                createBtn.disabled = false;
                 console.log(data["error"]);
                 return;
             }
@@ -226,11 +232,17 @@ createBtn.addEventListener("click", () => {
             pub = data["public_key"];
             priv = data["private_key"];
             download(pub, priv);
+            createBtn.disabled = false;
         })
-        .catch(err => console.log(err));
+        .catch(err => {
+            createBtn.disabled = false;
+            console.log(err);
+        });
 });
 
 loadBtn.addEventListener("click", () => {
+    loadBtn.disabled = true;
+
     let pub, priv;
 
     if (inputFile.files.length === 0) {
@@ -248,16 +260,19 @@ loadBtn.addEventListener("click", () => {
         } catch(e) {
             success = false;
             showAlert("not a wallet file", "danger");
+            loadBtn.disabled = false;
             return;
         }
 
         if (pub === undefined || priv === undefined) {
             showAlert("not a wallet file", "danger");
+            loadBtn.disabled = false;
             return;
         }
 
         save(pub, priv);
         inputFile.value = null;
+        loadBtn.disabled = false;
         loadAccountPage(pub);
     }
 
@@ -290,7 +305,7 @@ const loadDefaultPage = () => {
         });
     }
 
-    fetch(getBlockURL, {
+    fetch(getBlockURL + "?maxht=10", {
         method: "GET",
     })
         .then((resp) => {
@@ -315,6 +330,17 @@ const loadDefaultPage = () => {
             data["blocks"].blocks.forEach((b) => {
                 cookBlocks(b);
             });
+
+            count = data["blocks"].blocks.length;
+
+            if (parseInt(data["count"]) > 10) {
+                btn = document.createElement("button");
+                btn.textContent = "Load More";
+                btn.className = "btn btn-secondary m-3";
+                btn.id = "more";
+                def.appendChild(btn);
+                listenOnMore();
+            }
         })
         .catch((err) => console.log(err));
 }
@@ -340,13 +366,13 @@ const loadBalance = (addr, input) => {
                 return;
             }
 
-            input.value = data["balance"];
+            input.textContent = data["balance"];
         })
         .catch(err => console.log(err))
 }
 
 const cookAccount = addr => {
-    document.getElementById("input-address").value = addr;
+    document.getElementById("input-address").textContent = addr;
     loadBalance(addr, document.getElementById("input-balance"));
 }
 
@@ -494,3 +520,52 @@ document.getElementById("logout").addEventListener("click", () => {
 document.getElementById("home").addEventListener("click", () => {
     loadDefaultPage();
 });
+
+const listenOnMore = () => {
+    more = document.getElementById("more");
+
+    more.addEventListener("click", () => {
+        more.disabled = true;
+
+        const url = `${getBlockURL}?minht=${count}&maxht=${count + 10}`
+
+        fetch(url, {
+            method: "GET",
+        })
+            .then((resp) => {
+                if (!resp.ok) {
+                    return;
+                }
+
+                return resp.json();
+            })
+            .then((data) => {
+                if (data === undefined) {
+                    more.disabled = false;
+                    return;
+                }
+
+                if (!data.successful) {
+                    more.disabled = false;
+                    console.log(data["error"]);
+                    return;
+                }
+
+                data["blocks"].blocks.forEach((b) => {
+                    cookBlocks(b);
+                });
+
+                count = count + data["blocks"].blocks.length;
+
+                if (parseInt(data["count"]) == count) {
+                    document.getElementById("more").remove();
+                }
+
+                more.disabled = false;
+            })
+            .catch((err) => {
+                more.disabled = false;
+                console.log(err);
+            });
+    });
+}

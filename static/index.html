@@ -27,12 +27,21 @@
                 <button type="button" class="btn btn-warning" id="logout">Logout</button>
             </nav>
 
-            <div class="input-group mb-3" id="info">
-                <span class="input-group-text" id="balance">Balance</span>
-                <input id="input-balance" type="text" class="form-control" aria-label="balance" aria-describedby="balance" readonly>
 
-                <span class="input-group-text" id="address">Your Address</span>
-                <input id="input-address" type="text" class="form-control" aria-label="address" aria-describedby="address" readonly>
+            <div class="list-group">
+                <li class="list-group-item d-flex justify-content-between align-items-start">
+                    <div class="ms-2 me-auto">
+                        <div class="fw-bold">Balance</div>
+                        <span id="input-balance"></span>
+                    </div>
+                </li>
+
+                <li class="list-group-item d-flex justify-content-between align-items-start">
+                    <div class="ms-2 me-auto">
+                        <div class="fw-bold">Your Address</div>
+                        <span id="input-address"></span>
+                    </div>
+                </li>
             </div>
 
             <form id="send" class="row g-3 needs-validation container mt-5" novalidate>
