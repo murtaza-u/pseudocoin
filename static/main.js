@@ -52,7 +52,7 @@ const getTXs = (txs, div) => {
     let i = 1;
     txs.forEach((tx) => {
         const h = document.createElement("h2");
-        h.textContent = `TX: ${i}`;
+        h.textContent = `TX: ${i} [${tx["id"]}]`;
         i++;
 
         div.appendChild(h);
