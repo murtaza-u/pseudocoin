@@ -49,6 +49,7 @@ func (s *Service) Send(r *Send, sender string) (*jsonrpc.Send, error) {
 		Receiver:     r.RecvAddr,
 		SenderPubKey: r.SenderPub,
 		Amount:       r.Amount,
+		Msg:          r.Msg,
 	}, &newTX)
 	if err != nil {
 		return nil, err

@@ -13,9 +13,10 @@ type txParams struct {
 	Receiver     string `json:"receiver"`
 	SenderPubKey string `json:"sender_pub_key"`
 	Amount       uint   `json:"amount"`
+	Msg          string `json:"msg"`
 }
 
-func (cli *CLI) send(receiver, sender, senderPriv, senderPub string, amount uint) (interface{}, error) {
+func (cli *CLI) send(receiver, sender, senderPriv, senderPub, msg string, amount uint) (interface{}, error) {
 	if !core.ValidateAddress(receiver) || !core.ValidateAddress(sender) {
 		return nil, errors.New("Invalid address")
 	}
@@ -56,6 +57,7 @@ func (cli *CLI) send(receiver, sender, senderPriv, senderPub string, amount uint
 		Receiver:     receiver,
 		SenderPubKey: pubKey,
 		Amount:       amount,
+		Msg:          msg,
 	}, &newTX)
 	if err != nil {
 		return nil, err

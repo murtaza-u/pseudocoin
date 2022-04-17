@@ -15,6 +15,7 @@ type NewTXArgs struct {
 	Receiver     string `json:"receiver"`
 	SenderPubKey string `json:"sender_pub_key"`
 	Amount       uint   `json:"amount"`
+	Msg          string `json:"msg"`
 }
 
 func (rpc *RPC) NewTX(r *http.Request, args *NewTXArgs, resp *NewTX) error {
@@ -34,7 +35,7 @@ func (rpc *RPC) NewTX(r *http.Request, args *NewTXArgs, resp *NewTX) error {
 		return err
 	}
 
-	tx, err := core.NewUTXOTransaction(args.Receiver, args.Sender, w.PubKey, args.Amount, &utxoset)
+	tx, err := core.NewUTXOTransaction(args.Receiver, args.Sender, w.PubKey, args.Amount, &utxoset, args.Msg)
 	if err != nil {
 		return err
 	}

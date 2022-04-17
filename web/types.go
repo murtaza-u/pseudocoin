@@ -16,6 +16,7 @@ type Send struct {
 	SenderPub  string `json:"sender_pub"`
 	SenderPriv string `json:"sender_priv"`
 	Amount     uint   `json:"amount"`
+	Msg        string `json:"msg"`
 }
 
 type txParams struct {
@@ -23,6 +24,7 @@ type txParams struct {
 	Receiver     string `json:"receiver"`
 	SenderPubKey string `json:"sender_pub_key"`
 	Amount       uint   `json:"amount"`
+	Msg          string `json:"msg"`
 }
 
 type BlockQuery struct {

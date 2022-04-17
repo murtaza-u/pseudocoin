@@ -14,10 +14,13 @@ import (
 	"strings"
 )
 
+const maxMsgLen = 70
+
 type Transaction struct {
 	ID      []byte     `json:"id"`
 	Inputs  []TXInput  `json:"inputs"`
 	Outputs []TXOutput `json:"outputs"`
+	Msg     string     `json:"msg"`
 }
 
 func (tx Transaction) Hash() ([]byte, error) {
@@ -77,6 +80,13 @@ func NewCBTX(address, data string) (Transaction, error) {
 	}
 
 	tx.ID = txHash
+
+	if len(data) > maxMsgLen {
+		data = data[:maxMsgLen]
+	}
+
+	tx.Msg = data
+
 	return tx, nil
 }
 
@@ -190,9 +200,13 @@ func (tx *Transaction) Verify(prevTXs map[string]Transaction) (bool, error) {
 	return true, nil
 }
 
-func NewUTXOTransaction(receiver, sender string, senderPubKey []byte, amount uint, UTXOSet *UTXOSet) (Transaction, error) {
+func NewUTXOTransaction(receiver, sender string, senderPubKey []byte, amount uint, UTXOSet *UTXOSet, msg string) (Transaction, error) {
 	if strings.Compare(receiver, sender) == 0 {
 		return Transaction{}, errors.New("receiver cannot be equal to sender")
+	}
+
+	if len(msg) > maxMsgLen {
+		msg = msg[:maxMsgLen]
 	}
 
 	pubKeyHash, err := HashPubKey(senderPubKey)
@@ -249,6 +263,8 @@ func NewUTXOTransaction(receiver, sender string, senderPubKey []byte, amount uin
 	if err != nil {
 		return Transaction{}, err
 	}
+
+	tx.Msg = msg
 
 	return tx, nil
 }

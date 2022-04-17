@@ -58,6 +58,7 @@ func (cli *CLI) Run() (interface{}, error) {
 	sendCMDAmount := sendCMD.Uint("amount", 0, "amount")
 	sendCMDPriv := sendCMD.String("priv", "", "sender's private key")
 	sendCMDPub := sendCMD.String("pub", "", "sender's public key")
+	sendCMDMsg := sendCMD.String("msg", "", "message to attach with TX")
 
 	poolCMD := flag.NewFlagSet("pool", flag.ExitOnError)
 
@@ -136,8 +137,20 @@ func (cli *CLI) Run() (interface{}, error) {
 	}
 
 	if sendCMD.Parsed() {
-		if len(*sendCMDSender) != 0 && len(*sendCMDRecv) != 0 && len(*sendCMDPriv) != 0 && len(*sendCMDPub) != 0 && *sendCMDAmount != 0 {
-			return cli.send(*sendCMDRecv, *sendCMDSender, *sendCMDPriv, *sendCMDPub, *sendCMDAmount)
+		if len(*sendCMDSender) != 0 &&
+			len(*sendCMDRecv) != 0 &&
+			len(*sendCMDPriv) != 0 &&
+			len(*sendCMDPub) != 0 &&
+			len(*sendCMDMsg) != 0 &&
+			*sendCMDAmount != 0 {
+			return cli.send(
+				*sendCMDRecv,
+				*sendCMDSender,
+				*sendCMDPriv,
+				*sendCMDPub,
+				*sendCMDMsg,
+				*sendCMDAmount,
+			)
 		}
 	}
 

@@ -61,6 +61,7 @@ const getTXs = (txs, div) => {
 
         div.appendChild(h);
 
+        const msgText = document.createElement("p");
         const idiv = document.createElement("div");
         const odiv = document.createElement("div");
 
@@ -75,6 +76,9 @@ const getTXs = (txs, div) => {
 
         const inputs = tx["inputs"];
         const outputs = tx["outputs"];
+        const msg = tx["msg"];
+
+        msgText.textContent = `Msg: ${msg}`;
 
         inputs.forEach((i) => {
             const txid = document.createElement("li");
@@ -110,6 +114,7 @@ const getTXs = (txs, div) => {
             odiv.appendChild(ul);
         });
 
+        div.appendChild(msgText);
         div.appendChild(idiv);
         div.appendChild(odiv);
     });
@@ -445,7 +450,7 @@ const isNum = (num) => {
     return false;
 }
 
-const send = (amount, recv) => {
+const send = (amount, recv, msg) => {
     const { pub, priv } = get();
     if (pub === null || priv === null) {
         showAlert("failed to get public and private keys from local storage", "danger");
@@ -456,7 +461,8 @@ const send = (amount, recv) => {
         "recv_addr": recv,
         "amount": parseInt(amount, 10),
         "sender_pub": pub,
-        "sender_priv": priv
+        "sender_priv": priv,
+        "msg": msg
     }
 
     const headers = {
@@ -512,14 +518,19 @@ const send = (amount, recv) => {
 
         const amount = document.getElementById("amount").value;
         const recv = document.getElementById("recv-address").value;
+        const msg = document.getElementById("msg").value;
 
         if (!isNum(amount) || amount <= 0) {
             showAlert("Amount must be a positive integer", "info");
-            form.reset();
             return;
         }
 
-        send(amount, recv);
+        if (msg.length > 70) {
+            showAlert("Message too long", "info");
+            return;
+        }
+
+        send(amount, recv, msg);
 
         form.reset();
     }, false)
