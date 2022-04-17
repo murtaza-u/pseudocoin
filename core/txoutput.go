@@ -19,7 +19,7 @@ func (out *TXOutput) Lock(address string) error {
 		return err
 	}
 
-	pubKeyHash = pubKeyHash[1 : len(pubKeyHash)-addressChecksumLen]
+	pubKeyHash = pubKeyHash[1 : len(pubKeyHash)-AddressChecksumLen]
 	out.PubkeyHash = pubKeyHash
 	return nil
 }

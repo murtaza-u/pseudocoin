@@ -133,3 +133,18 @@ func (s *Service) GetAddress(pub string) (string, error) {
 
 	return addr, nil
 }
+
+func (s *Service) GetMyTXs(addr string) (*jsonrpc.MyTXs, error) {
+	var txs jsonrpc.MyTXs
+
+	err := jsonrpc.RPCCall(
+		"RPC.GetMyTXs",
+		&balanceParams{addr},
+		&txs,
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	return &txs, nil
+}

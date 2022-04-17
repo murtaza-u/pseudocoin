@@ -5,6 +5,7 @@ const createWalletURL = baseURL + "/createwallet";
 const getAddressURL = baseURL + "/getaddress?pub=";
 const getBalanceURL = baseURL + "/getbalance?addr=";
 const sendURL = baseURL + "/send";
+const getMyTXsURL = baseURL + "/getmytxs/?addr="
 
 const account = document.getElementById("account");
 const def = document.getElementById("default");
@@ -390,6 +391,7 @@ const loadBalance = (addr, input) => {
 const cookAccount = addr => {
     document.getElementById("input-address").textContent = addr;
     loadBalance(addr, document.getElementById("input-balance"));
+    loadMyTXs(addr);
 }
 
 const loadAccountPage = pub => {
@@ -689,3 +691,100 @@ document.getElementById("check-balance").addEventListener("click", () => {
         loadBalance(addr, checkBalanceVal);
     }, false);
 })()
+
+const getMyTXs = (addr) => {
+    try {
+        document.querySelector("table").remove();
+    } catch(e) {}
+
+    const table = document.createElement("table");
+    table.className = "table table-hover mt-5";
+
+    const thead = document.createElement("thead");
+    const tr = document.createElement("tr");
+
+    const thSender = document.createElement("th");
+    const thRecv = document.createElement("th");
+    const thAmount = document.createElement("th");
+    const thMsg = document.createElement("th");
+
+    thSender.textContent = "Sender";
+    thAmount.textContent = "Amount"
+    thMsg.textContent = "Message";
+    thRecv.textContent = "Receiver";
+
+    tr.appendChild(thSender);
+    tr.appendChild(thRecv);
+    tr.appendChild(thAmount);
+    tr.appendChild(thMsg);
+
+    thead.append(tr);
+    table.appendChild(thead);
+
+    const tbody = document.createElement("tbody");
+
+    fetch(getMyTXsURL + addr, {
+        method: "GET",
+    })
+        .then(resp => {
+            if (!resp.ok) {
+                return;
+            }
+
+            return resp.json();
+        })
+        .then(data => {
+            if (data === undefined) {
+                return;
+            }
+
+            if (!data.successful) {
+                console.log(data["error"]);
+                return;
+            }
+
+            data["txs"].txs.forEach(tx => {
+                const tr = document.createElement("tr");
+
+                const sender = document.createElement("td");
+                const recv = document.createElement("td");
+                const amount = document.createElement("td");
+                const msg = document.createElement("td");
+
+                if (tx["sender"] === addr) {
+                    sender.textContent = "you";
+                } else {
+                    sender.textContent = tx["sender"];
+                }
+
+                if (tx["receiver"] === addr) {
+                    recv.textContent = "you";
+                } else {
+                    recv.textContent = tx["receiver"];
+                }
+
+                amount.textContent = tx["amount"];
+                msg.textContent = tx["msg"];
+
+                tr.appendChild(sender);
+                tr.appendChild(recv);
+                tr.appendChild(amount);
+                tr.appendChild(msg);
+
+                tbody.appendChild(tr);
+            });
+
+            table.appendChild(tbody);
+            account.appendChild(table);
+        })
+        .catch(err => console.log(err))
+}
+
+const loadMyTXs = (addr) => {
+    const getMyTXBtn = document.getElementById("get-my-tx");
+    getMyTXBtn.addEventListener("click", () => {
+        getMyTXBtn.disabled = true;
+        getMyTXs(addr);
+        getMyTXBtn.disabled = false;
+    });
+}

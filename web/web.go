@@ -15,6 +15,7 @@ func routes(app *fiber.App, c *Controller) {
 	app.Post("/send", c.Send)
 	app.Get("/getblocks", c.GetBlocks)
 	app.Get("/getaddress", c.GetAddress)
+	app.Get("/getmytxs", c.GetMyTXs)
 }
 
 func Init() {

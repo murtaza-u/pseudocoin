@@ -12,6 +12,7 @@ type IService interface {
 	Send(*Send, string) (*jsonrpc.Send, error)
 	GetBlocks(*BlockQuery) (*jsonrpc.Blocks, error)
 	GetAddress(string) (string, error)
+	GetMyTXs(addr string) (*jsonrpc.MyTXs, error)
 }
 
 type Controller struct {
@@ -164,5 +165,28 @@ func (c *Controller) GetAddress(ctx *fiber.Ctx) error {
 		"successful": true,
 		"public_key": pub,
 		"address":    addr,
+	})
+}
+
+func (c *Controller) GetMyTXs(ctx *fiber.Ctx) error {
+	addr := ctx.Query("addr")
+	if len(addr) == 0 {
+		return ctx.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"successful": false,
+			"error":      "address not provided",
+		})
+	}
+
+	txs, err := c.s.GetMyTXs(addr)
+	if err != nil {
+		return ctx.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"successful": false,
+			"error":      err.Error(),
+		})
+	}
+
+	return ctx.Status(fiber.StatusOK).JSON(fiber.Map{
+		"successful": true,
+		"txs":        txs,
 	})
 }
