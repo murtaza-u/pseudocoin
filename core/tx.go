@@ -16,7 +16,7 @@ import (
 )
 
 const (
-	maxMsgLen = 70
+	maxMsgLen = 72
 	subsidy   = 100
 )
 
