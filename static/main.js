@@ -391,7 +391,7 @@ const loadBalance = (addr, input) => {
 const cookAccount = addr => {
     document.getElementById("input-address").textContent = addr;
     loadBalance(addr, document.getElementById("input-balance"));
-    loadMyTXs(addr);
+    loadMyTXs(addr, account);
 }
 
 const loadAccountPage = pub => {
@@ -605,66 +605,6 @@ const loadCheckBalancePage = () => {
     account.style.display = "none";
     def.style.display = "none";
     balancePage.style.display = "block";
-
-    try {
-        document.getElementById("login").remove();
-    } catch(e) {}
-
-    const { pub, priv } = get();
-    if (pub !== null && priv !== null) {
-        const nav = document.querySelector("#default nav");
-
-        const btn = document.createElement("button");
-        btn.type = "button";
-        btn.className = "btn btn-secondary";
-        btn.id = "login";
-        btn.textContent = "Login"
-
-        nav.appendChild(btn);
-
-        btn.addEventListener("click", () => {
-            loadAccountPage(pub);
-        });
-    }
-
-    fetch(getBlockURL + "?maxht=10", {
-        method: "GET",
-    })
-        .then((resp) => {
-            if (!resp.ok) {
-                return;
-            }
-
-            return resp.json();
-        })
-        .then((data) => {
-            if (data === undefined) {
-                return;
-            }
-
-            if (!data.successful) {
-                console.log(data["error"]);
-                return;
-            }
-
-            blocks.innerHTML = null;
-
-            data["blocks"].blocks.forEach((b) => {
-                cookBlocks(b);
-            });
-
-            count = data["blocks"].blocks.length;
-
-            if (parseInt(data["count"]) > 10) {
-                btn = document.createElement("button");
-                btn.textContent = "Load More";
-                btn.className = "btn btn-secondary m-3";
-                btn.id = "more";
-                def.appendChild(btn);
-                listenOnMore();
-            }
-        })
-        .catch((err) => console.log(err));
 }
 
 document.getElementById("check-balance").addEventListener("click", () => {
@@ -689,10 +629,11 @@ document.getElementById("check-balance").addEventListener("click", () => {
         const addr = input.value;
 
         loadBalance(addr, checkBalanceVal);
+        getMyTXs(addr, balancePage);
     }, false);
 })()
 
-const getMyTXs = (addr) => {
+const getMyTXs = (addr, div) => {
     try {
         document.querySelector("table").remove();
     } catch(e) {}
@@ -775,16 +716,16 @@ const getMyTXs = (addr) => {
             });
 
             table.appendChild(tbody);
-            account.appendChild(table);
+            div.appendChild(table);
         })
         .catch(err => console.log(err))
 }
 
-const loadMyTXs = (addr) => {
+const loadMyTXs = (addr, div) => {
     const getMyTXBtn = document.getElementById("get-my-tx");
     getMyTXBtn.addEventListener("click", () => {
         getMyTXBtn.disabled = true;
-        getMyTXs(addr);
+        getMyTXs(addr, div);
         getMyTXBtn.disabled = false;
     });
 }

@@ -97,6 +97,12 @@ func (rpc *RPC) GetMyTXs(r *http.Request, args *struct{ Address string }, resp *
 				amount += tx.Outputs[in.Out].Value
 			}
 
+			for _, out := range tx.Outputs {
+				if out.IsLockedWith(pubKeyHash) {
+					amount -= out.Value
+				}
+			}
+
 			versionPayload := append([]byte{core.Version}, out.PubkeyHash...)
 			checksum := core.Checksum(versionPayload)
 			fullPayload := append(versionPayload, checksum...)

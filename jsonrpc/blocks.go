@@ -9,7 +9,7 @@ import (
 
 type Blocks struct {
 	Blocks []core.Block `json:"blocks"`
-	Count  uint         `json:"count"`
+	Count  uint64       `json:"count"`
 }
 
 func (rpc *RPC) GetBlocks(r *http.Request, args *struct{ MaxHT, MinHT uint }, resp *Blocks) error {
