@@ -46,10 +46,18 @@ const clearAllAlerts = () => {
 const parseUnixTime = (time) => {
     const date = new Date(time * 1000);
     const hours = date.getHours();
-    const minutes = "0" + date.getMinutes();
-    const seconds = "0" + date.getSeconds();
+    let minutes = "0" + date.getMinutes();
+    let seconds = "0" + date.getSeconds();
 
-    const fmt = `${hours}:${minutes.substring(1, 4)}:${seconds.substring(1, 4)}`;
+    if (minutes.length === 3) {
+        minutes = minutes.substring(1, 4);
+    }
+
+    if (seconds.length === 3) {
+        seconds = seconds.substring(1, 4);
+    }
+
+    const fmt = `${hours}:${minutes}:${seconds}`;
     return fmt;
 };
 
