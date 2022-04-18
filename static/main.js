@@ -397,6 +397,17 @@ const cookAccount = addr => {
 const loadAccountPage = pub => {
     clearAllAlerts();
 
+    document.getElementById("input-balance").textContent = null;
+    document.getElementById("input-address").textContent = null;
+    document.getElementById("send").reset();
+
+    try {
+        const tables = document.querySelectorAll("table");
+        for (let i = 0; i < tables.length; i ++) {
+            tables[i].remove();
+        }
+    } catch(e) {}
+
     account.style.display = "block";
     def.style.display = "none";
     balancePage.style.display = "none";
@@ -556,7 +567,7 @@ const listenOnMore = () => {
     more.addEventListener("click", () => {
         more.disabled = true;
 
-        const url = `${getBlockURL}?minht=${count}&maxht=${count + 10}`
+        const url = `${getBlockURL}?minht=${count - 1}&maxht=${count + 8}`
 
         fetch(url, {
             method: "GET",
@@ -584,13 +595,13 @@ const listenOnMore = () => {
                     cookBlocks(b);
                 });
 
-                count = count + data["blocks"].blocks.length;
-
-                if (parseInt(data["count"]) == count) {
-                    document.getElementById("more").remove();
-                }
+                count += data["blocks"].blocks.length;
 
                 more.disabled = false;
+
+                if (parseInt(data["count"]) == count - 1) {
+                    more.remove();
+                }
             })
             .catch((err) => {
                 more.disabled = false;
@@ -647,20 +658,20 @@ const getMyTXs = (addr, div) => {
     const thead = document.createElement("thead");
     const tr = document.createElement("tr");
 
+    const thMsg = document.createElement("th");
+    const thAmount = document.createElement("th");
     const thSender = document.createElement("th");
     const thRecv = document.createElement("th");
-    const thAmount = document.createElement("th");
-    const thMsg = document.createElement("th");
 
-    thSender.textContent = "Sender";
-    thAmount.textContent = "Amount"
     thMsg.textContent = "Message";
+    thAmount.textContent = "Amount"
+    thSender.textContent = "Sender";
     thRecv.textContent = "Receiver";
 
+    tr.appendChild(thMsg);
+    tr.appendChild(thAmount);
     tr.appendChild(thSender);
     tr.appendChild(thRecv);
-    tr.appendChild(thAmount);
-    tr.appendChild(thMsg);
 
     thead.append(tr);
     table.appendChild(thead);
@@ -687,36 +698,38 @@ const getMyTXs = (addr, div) => {
                 return;
             }
 
-            data["txs"].txs.forEach(tx => {
-                const tr = document.createElement("tr");
+            if (data["txs"].txs != null) {
+                data["txs"].txs.forEach(tx => {
+                    const tr = document.createElement("tr");
 
-                const sender = document.createElement("td");
-                const recv = document.createElement("td");
-                const amount = document.createElement("td");
-                const msg = document.createElement("td");
+                    const msg = document.createElement("td");
+                    const amount = document.createElement("td");
+                    const sender = document.createElement("td");
+                    const recv = document.createElement("td");
 
-                if (tx["sender"] === addr) {
-                    sender.textContent = "you";
-                } else {
-                    sender.textContent = tx["sender"];
-                }
+                    if (tx["sender"] === addr) {
+                        sender.textContent = "you";
+                        } else {
+                        sender.textContent = tx["sender"];
+                    }
 
-                if (tx["receiver"] === addr) {
-                    recv.textContent = "you";
-                } else {
-                    recv.textContent = tx["receiver"];
-                }
+                    if (tx["receiver"] === addr) {
+                        recv.textContent = "you";
+                    } else {
+                        recv.textContent = tx["receiver"];
+                    }
 
-                amount.textContent = tx["amount"];
-                msg.textContent = tx["msg"];
+                    amount.textContent = tx["amount"];
+                    msg.textContent = tx["msg"];
 
-                tr.appendChild(sender);
-                tr.appendChild(recv);
-                tr.appendChild(amount);
-                tr.appendChild(msg);
+                    tr.appendChild(msg);
+                    tr.appendChild(amount);
+                    tr.appendChild(sender);
+                    tr.appendChild(recv);
 
-                tbody.appendChild(tr);
-            });
+                    tbody.appendChild(tr);
+                });
+            }
 
             table.appendChild(tbody);
             div.appendChild(table);
