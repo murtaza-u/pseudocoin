@@ -1,6 +1,7 @@
 package core
 
 import (
+	"bytes"
 	"encoding/hex"
 	"errors"
 
@@ -166,11 +167,40 @@ func (u *UTXOSet) FindSpendableOutputs(pubkeyHash []byte, amount uint) (uint, ma
 	spendableOutputs := make(map[string][]int)
 
 	err := u.Blockchain.DB.View(func(t *bolt.Tx) error {
-		b := t.Bucket([]byte(utxoBucket))
-		c := b.Cursor()
+		utxoBuck := t.Bucket([]byte(utxoBucket))
+		utxoCursor := utxoBuck.Cursor()
+
+		memBuck := t.Bucket([]byte(pool))
+
+		if memBuck == nil {
+		accumulate:
+			for k, v := utxoCursor.First(); k != nil; k, v = utxoCursor.Next() {
+				txID := hex.EncodeToString(k)
+
+				outs, err := DeserializeOutputs(v)
+				if err != nil {
+					return err
+				}
+
+				for outIDX, out := range outs.Outputs {
+					if out.IsLockedWith(pubkeyHash) {
+						spendableOutputs[txID] = append(spendableOutputs[txID], outIDX)
+						accumulated += out.Value
+
+						if accumulated >= amount {
+							break accumulate
+						}
+					}
+				}
+			}
+
+			return nil
+		}
+
+		memCursor := memBuck.Cursor()
 
 	Accumulate:
-		for k, v := c.First(); k != nil; k, v = c.Next() {
+		for k, v := utxoCursor.First(); k != nil; k, v = utxoCursor.Next() {
 			txID := hex.EncodeToString(k)
 
 			outs, err := DeserializeOutputs(v)
@@ -178,8 +208,22 @@ func (u *UTXOSet) FindSpendableOutputs(pubkeyHash []byte, amount uint) (uint, ma
 				return err
 			}
 
+		Out:
 			for outIDX, out := range outs.Outputs {
 				if out.IsLockedWith(pubkeyHash) {
+					for x, y := memCursor.First(); x != nil; x, y = memCursor.Next() {
+						tx, err := DeserializeTX(y)
+						if err != nil {
+							return err
+						}
+
+						for _, in := range tx.Inputs {
+							if bytes.Compare(in.TxID, k) == 0 && in.Out == outIDX {
+								continue Out
+							}
+						}
+					}
+
 					spendableOutputs[txID] = append(spendableOutputs[txID], outIDX)
 					accumulated += out.Value
 
