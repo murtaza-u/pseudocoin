@@ -115,6 +115,10 @@ func Start(addr string) {
 			return nil
 		}
 
+		if len(txs) > 5 {
+			txs = txs[:5]
+		}
+
 		b, err := mine(addr, txs)
 		if err != nil {
 			return err

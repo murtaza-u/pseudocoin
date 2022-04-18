@@ -226,7 +226,9 @@ func NewUTXOTransaction(receiver, sender string, senderPubKey []byte, amount uin
 	}
 
 	if acc < amount {
-		return Transaction{}, errors.New("Not enough funds")
+		return Transaction{}, errors.New(
+			"Not enough funds or UTXO(s) referenced in this transaction are already referenced by input(s) of transaction(s) in the mempool",
+		)
 	}
 
 	var inputs []TXInput
