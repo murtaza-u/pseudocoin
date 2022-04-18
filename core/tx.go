@@ -10,11 +10,15 @@ import (
 	"encoding/hex"
 	"errors"
 	"fmt"
+	"math"
 	"math/big"
 	"strings"
 )
 
-const maxMsgLen = 70
+const (
+	maxMsgLen = 70
+	subsidy   = 100
+)
 
 type Transaction struct {
 	ID      []byte     `json:"id"`
@@ -46,8 +50,6 @@ func DeserializeTX(data []byte) (Transaction, error) {
 	err := decoder.Decode(&tx)
 	return tx, err
 }
-
-const subsidy = 100
 
 func NewCBTX(address, data string) (Transaction, error) {
 	if len(data) == 0 {
@@ -201,6 +203,10 @@ func (tx *Transaction) Verify(prevTXs map[string]Transaction) (bool, error) {
 }
 
 func NewUTXOTransaction(receiver, sender string, senderPubKey []byte, amount uint, UTXOSet *UTXOSet, msg string) (Transaction, error) {
+	if amount < 2 {
+		return Transaction{}, errors.New("TX amount too low. Minium amount must be >= 2")
+	}
+
 	if strings.Compare(receiver, sender) == 0 {
 		return Transaction{}, errors.New("receiver cannot be equal to sender")
 	}
@@ -246,7 +252,8 @@ func NewUTXOTransaction(receiver, sender string, senderPubKey []byte, amount uin
 	}
 
 	// build a list of outputs
-	outputs = append(outputs, NewTXOutput(amount, receiver))
+	fee := uint(math.Ceil(0.1 * float64(amount)))
+	outputs = append(outputs, NewTXOutput(amount-fee, receiver))
 
 	if acc > amount {
 		// a change

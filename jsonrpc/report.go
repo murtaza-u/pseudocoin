@@ -24,8 +24,6 @@ func (rpc *RPC) ReportBlock(r *http.Request, args *ReportParams, resp *Report) e
 		return err
 	}
 
-	log.Printf("hash: %x\n", block.Hash)
-
 	pow := core.NewPoW(&block)
 	valid, err := pow.Validate()
 	if err != nil {
@@ -67,6 +65,33 @@ func (rpc *RPC) ReportBlock(r *http.Request, args *ReportParams, resp *Report) e
 
 		if !valid {
 			return errors.New("one or more invalid tx")
+		}
+
+		if tx.IsCoinbase() {
+			continue
+		}
+
+		var expt, actual uint
+		for _, out := range tx.Outputs {
+			actual += out.Value
+		}
+
+		for _, in := range tx.Inputs {
+			if in.TxID == nil {
+				continue
+			}
+
+			tx, err := bc.FindTXByID(in.TxID)
+			if err != nil {
+				return err
+			}
+
+			expt += tx.Outputs[in.Out].Value
+		}
+
+		if actual != expt {
+			log.Printf("actual: %d\texpt: %d\n", actual, expt)
+			return errors.New("invalid TX")
 		}
 	}
 

@@ -12,26 +12,6 @@ type Blocks struct {
 	Count  uint         `json:"count"`
 }
 
-func getBlockHeight(bc *core.Blockchain) (uint, error) {
-	i := bc.Iterator()
-	var height uint
-
-	for {
-		b, err := i.Next()
-		if err != nil {
-			return 0, err
-		}
-
-		if b == nil {
-			break
-		}
-
-		height++
-	}
-
-	return height, nil
-}
-
 func (rpc *RPC) GetBlocks(r *http.Request, args *struct{ MaxHT, MinHT uint }, resp *Blocks) error {
 	if args.MaxHT < args.MinHT {
 		return errors.New("max height cannot be less than min height")
@@ -43,7 +23,7 @@ func (rpc *RPC) GetBlocks(r *http.Request, args *struct{ MaxHT, MinHT uint }, re
 	}
 	defer bc.DB.Close()
 
-	count, err := getBlockHeight(bc)
+	count, err := bc.GetBlockHeight()
 	if err != nil {
 		return err
 	}

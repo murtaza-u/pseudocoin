@@ -11,7 +11,7 @@ import (
 
 const (
 	blocksBucket        = "blocks"
-	genesisCoinbaseData = "I use Arch BTW"
+	genesisCoinbaseData = "Murtaza Udaipurwala - the man behind the pseudocoin protocol"
 )
 
 type Blockchain struct {
@@ -87,10 +87,12 @@ func NewBlockchain(dbFile string) (Blockchain, error) {
 		return nil
 	})
 
-	return Blockchain{
+	bc := Blockchain{
 		Tip: tip,
 		DB:  db,
-	}, nil
+	}
+
+	return bc, nil
 }
 
 func (bc *Blockchain) Iterator() *Iterator {
@@ -244,4 +246,24 @@ func (chain *Blockchain) FindUXTOs() (map[string]TXOutputs, error) {
 	}
 
 	return UTXOs, nil
+}
+
+func (bc *Blockchain) GetBlockHeight() (uint64, error) {
+	i := bc.Iterator()
+	var height uint64
+
+	for {
+		b, err := i.Next()
+		if err != nil {
+			return 0, err
+		}
+
+		if b == nil {
+			break
+		}
+
+		height++
+	}
+
+	return height, nil
 }
