@@ -635,8 +635,11 @@ document.getElementById("check-balance").addEventListener("click", () => {
 
 const getMyTXs = (addr, div) => {
     try {
-        document.querySelector("table").remove();
-    } catch(e) {}
+        const tables = div.querySelectorAll("table");
+        for (let i = 0; i < tables.length; i++) {
+            tables[i].remove();
+        }
+    } catch(e) {console.log(e)}
 
     const table = document.createElement("table");
     table.className = "table table-hover mt-5";
@@ -717,6 +720,13 @@ const getMyTXs = (addr, div) => {
 
             table.appendChild(tbody);
             div.appendChild(table);
+
+            try {
+                const tables = div.querySelectorAll("table");
+                for (let i = 0; i < tables.length - 1; i++) {
+                    tables[i].remove();
+                }
+            } catch(e) {console.log(e)}
         })
         .catch(err => console.log(err))
 }
