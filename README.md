@@ -1,5 +1,6 @@
 # Pseudocoin
-A cryptocurrency built with the objective of understanding the core technology behind it.
+A cryptocurrency built with the objective of understanding the core
+technology behind it.
 
 # References
 - [Bitcoin white paper](https://bitcoin.org/en/bitcoin-paper)

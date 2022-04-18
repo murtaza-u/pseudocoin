@@ -11,7 +11,6 @@ ENTRYPOINT ["/go/pseudocoin/pcli"]
 FROM alpine:latest
 
 COPY --from=builder /go/pseudocoin/pcli pcli
+COPY --from=builder /go/pseudocoin/data data
 
-RUN ./pcli blockchain --create blockchain.db --address ""
-
-ENTRYPOINT [ "./pcli", "centralnode ", "--start", "blockchain.db" ]
+ENTRYPOINT [ "./pcli", "centralnode", "--start", "/data/blockchain.db" ]
