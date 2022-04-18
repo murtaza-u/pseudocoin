@@ -14,7 +14,7 @@ type PoW struct {
 }
 
 const (
-	targetBits = 20
+	targetBits = 8
 	maxNonce   = math.MaxUint64
 )
 
