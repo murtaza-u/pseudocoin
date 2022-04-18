@@ -14,4 +14,4 @@ COPY --from=builder /go/pseudocoin/pcli pcli
 
 ENTRYPOINT [ "./pcli", "mine", "--addr" ]
 
-CMD [ "XXXXXXXXXXXXX" ]
+CMD [ "nil" ]
