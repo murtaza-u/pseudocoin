@@ -136,7 +136,7 @@ func (rpc *RPC) ReportBlock(r *http.Request, args *ReportParams, resp *Report) e
 	defer bc.DB.Close()
 
 	utxoset := core.UTXOSet{Blockchain: bc}
-	err = utxoset.Update(&block)
+	err = utxoset.Reindex()
 	if err != nil {
 		return err
 	}

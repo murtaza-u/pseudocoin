@@ -204,48 +204,49 @@ func (bc *Blockchain) MineBlock(txs []*Transaction) (Block, error) {
 
 // scan the entire blockchain and find all UTXOs
 func (chain *Blockchain) FindUXTOs() (map[string]TXOutputs, error) {
-	UTXOs := make(map[string]TXOutputs)
-	spentUTXOs := make(map[string][]int)
+	UTXO := make(map[string]TXOutputs)
+	spentTXOs := make(map[string][]int)
 	i := chain.Iterator()
 
 	for {
-		block, err := i.Next()
+		b, err := i.Next()
 		if err != nil {
-			return UTXOs, err
+			return UTXO, err
 		}
 
-		if block == nil {
+		if b == nil {
 			break
 		}
 
-		for _, tx := range block.Transactions {
+		for _, tx := range b.Transactions {
 			txID := hex.EncodeToString(tx.ID)
 
-			if tx.IsCoinbase() != true {
-				for _, in := range tx.Inputs {
-					inID := hex.EncodeToString(in.TxID)
-					spentUTXOs[inID] = append(spentUTXOs[inID], in.Out)
-				}
-			}
-
-		Output:
-			for outIDX, out := range tx.Outputs {
-				if spentUTXOs[txID] != nil {
-					for _, spentOut := range spentUTXOs[txID] {
-						if spentOut == outIDX {
-							continue Output
+		Outputs:
+			for outIdx, out := range tx.Outputs {
+				// Was the output spent?
+				if spentTXOs[txID] != nil {
+					for _, spentOutIdx := range spentTXOs[txID] {
+						if spentOutIdx == outIdx {
+							continue Outputs
 						}
 					}
 				}
 
-				outs := UTXOs[txID]
+				outs := UTXO[txID]
 				outs.Outputs = append(outs.Outputs, out)
-				UTXOs[txID] = outs
+				UTXO[txID] = outs
+			}
+
+			if tx.IsCoinbase() == false {
+				for _, in := range tx.Inputs {
+					inTxID := hex.EncodeToString(in.TxID)
+					spentTXOs[inTxID] = append(spentTXOs[inTxID], in.Out)
+				}
 			}
 		}
 	}
 
-	return UTXOs, nil
+	return UTXO, nil
 }
 
 func (bc *Blockchain) GetBlockHeight() (uint64, error) {
