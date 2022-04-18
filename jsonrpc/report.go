@@ -89,8 +89,8 @@ func (rpc *RPC) ReportBlock(r *http.Request, args *ReportParams, resp *Report) e
 			expt += tx.Outputs[in.Out].Value
 		}
 
-		if actual != expt {
-			log.Printf("actual: %d\texpt: %d\n", actual, expt)
+		if actual > expt {
+			log.Printf("actual: %d\texpected: %d\n", actual, expt)
 			return errors.New("invalid TX")
 		}
 	}
