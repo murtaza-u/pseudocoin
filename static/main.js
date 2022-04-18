@@ -539,7 +539,7 @@ const send = (amount, recv, msg) => {
         }
 
         if (msg.length > 72) {
-            showAlert("Message too long", "info");
+            showAlert("Message too long. Length must be <= 72 character", "info");
             return;
         }
 
