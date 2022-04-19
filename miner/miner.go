@@ -69,6 +69,7 @@ func mine(addr string, txs []*core.Transaction) (*core.Block, error) {
 
 	for _, tx := range txs {
 		fee := uint(math.Ceil(0.1 * float64(tx.Outputs[0].Value)))
+		tx.Outputs[0].Value -= fee
 		tx.Outputs = append(tx.Outputs, core.NewTXOutput(fee, addr))
 	}
 

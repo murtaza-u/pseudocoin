@@ -254,8 +254,7 @@ func NewUTXOTransaction(receiver, sender string, senderPubKey []byte, amount uin
 	}
 
 	// build a list of outputs
-	fee := uint(math.Ceil(0.1 * float64(amount)))
-	outputs = append(outputs, NewTXOutput(amount-fee, receiver))
+	outputs = append(outputs, NewTXOutput(amount, receiver))
 
 	if acc > amount {
 		// a change

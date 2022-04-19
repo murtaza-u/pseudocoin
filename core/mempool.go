@@ -3,6 +3,7 @@ package core
 import (
 	"bytes"
 	"errors"
+	"log"
 
 	"github.com/boltdb/bolt"
 )
@@ -10,6 +11,25 @@ import (
 const pool = "pool"
 
 func (bc *Blockchain) AddToPool(tx Transaction) error {
+	var expt, actual uint
+	for _, out := range tx.Outputs {
+		actual += out.Value
+	}
+
+	for _, in := range tx.Inputs {
+		t, err := bc.FindTXByID(in.TxID)
+		if err != nil {
+			return err
+		}
+
+		expt += t.Outputs[in.Out].Value
+	}
+
+	if actual != expt {
+		log.Printf("invalid tx| actual: %d\texpected: %d\n", actual, expt)
+		return errors.New("invalid TX")
+	}
+
 	valid, err := bc.VerifyTX(tx)
 	if err != nil {
 		return err

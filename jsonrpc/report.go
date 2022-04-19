@@ -90,7 +90,13 @@ func (rpc *RPC) ReportBlock(r *http.Request, args *ReportParams, resp *Report) e
 		}
 
 		if actual != expt {
-			log.Printf("actual: %d\texpt: %d\n", actual, expt)
+			log.Printf("deleting invalid tx from mempool: %x\n", tx.ID)
+
+			bc.DB.Update(func(t *bolt.Tx) error {
+				b := t.Bucket([]byte("pool"))
+				return b.Delete(tx.ID)
+			})
+
 			return errors.New("invalid TX")
 		}
 	}
