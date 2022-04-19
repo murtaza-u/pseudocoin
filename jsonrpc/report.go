@@ -96,7 +96,6 @@ func (rpc *RPC) ReportBlock(r *http.Request, args *ReportParams, resp *Report) e
 				b := t.Bucket([]byte("pool"))
 				return b.Delete(tx.ID)
 			})
-
 			return errors.New("invalid TX")
 		}
 	}
