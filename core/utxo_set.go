@@ -1,9 +1,9 @@
 package core
 
 import (
-	"bytes"
 	"encoding/hex"
 	"errors"
+	"strings"
 
 	"github.com/boltdb/bolt"
 )
@@ -163,79 +163,52 @@ func (u *UTXOSet) FindSpendableOutputs(pubkeyHash []byte, amount uint) (uint, ma
 		return 0, nil, errors.New("invalid amount")
 	}
 
-	var accumulated uint
-	spendableOutputs := make(map[string][]int)
+	var acc uint
+	spendableOuts := make(map[string][]int)
 
-	err := u.Blockchain.DB.View(func(t *bolt.Tx) error {
-		utxoBuck := t.Bucket([]byte(utxoBucket))
-		utxoCursor := utxoBuck.Cursor()
+	utxos, err := u.Blockchain.FindUTXOsWithIDX()
+	if err != nil {
+		return 0, nil, err
+	}
 
-		memBuck := t.Bucket([]byte(pool))
+Accumulate:
+	for txID, outs := range utxos {
+		for outIDX, out := range outs {
+			if out.IsLockedWith(pubkeyHash) {
+				err := u.Blockchain.DB.View(func(t *bolt.Tx) error {
+					b := t.Bucket([]byte(pool))
+					if b != nil {
+						c := b.Cursor()
+						for k, v := c.First(); k != nil; k, v = c.Next() {
+							tx, err := DeserializeTX(v)
+							if err != nil {
+								return err
+							}
 
-		if memBuck == nil {
-		accumulate:
-			for k, v := utxoCursor.First(); k != nil; k, v = utxoCursor.Next() {
-				txID := hex.EncodeToString(k)
-
-				outs, err := DeserializeOutputs(v)
-				if err != nil {
-					return err
-				}
-
-				for outIDX, out := range outs.Outputs {
-					if out.IsLockedWith(pubkeyHash) {
-						spendableOutputs[txID] = append(spendableOutputs[txID], outIDX)
-						accumulated += out.Value
-
-						if accumulated >= amount {
-							break accumulate
-						}
-					}
-				}
-			}
-
-			return nil
-		}
-
-		memCursor := memBuck.Cursor()
-
-	Accumulate:
-		for k, v := utxoCursor.First(); k != nil; k, v = utxoCursor.Next() {
-			txID := hex.EncodeToString(k)
-
-			outs, err := DeserializeOutputs(v)
-			if err != nil {
-				return err
-			}
-
-		Out:
-			for outIDX, out := range outs.Outputs {
-				if out.IsLockedWith(pubkeyHash) {
-					for x, y := memCursor.First(); x != nil; x, y = memCursor.Next() {
-						tx, err := DeserializeTX(y)
-						if err != nil {
-							return err
-						}
-
-						for _, in := range tx.Inputs {
-							if bytes.Compare(in.TxID, k) == 0 && in.Out == outIDX {
-								continue Out
+							for _, in := range tx.Inputs {
+								id := hex.EncodeToString(in.TxID)
+								if strings.Compare(id, txID) == 0 && in.Out == outIDX {
+									return nil
+								}
 							}
 						}
 					}
 
-					spendableOutputs[txID] = append(spendableOutputs[txID], outIDX)
-					accumulated += out.Value
+					spendableOuts[txID] = append(spendableOuts[txID], outIDX)
+					acc += out.Value
+					return nil
+				})
 
-					if accumulated >= amount {
-						break Accumulate
-					}
+				if err != nil {
+					return 0, nil, err
+				}
+
+				if acc >= amount {
+					break Accumulate
 				}
 			}
 		}
+	}
 
-		return nil
-	})
-
-	return accumulated, spendableOutputs, err
+	return acc, spendableOuts, nil
 }
