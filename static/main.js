@@ -45,7 +45,11 @@ const clearAllAlerts = () => {
 
 const parseUnixTime = (time) => {
     const date = new Date(time * 1000);
+    const year = date.getFullYear();
+    const month = date.getMonth() + 1;
+    const day = date.getDate();
     const hours = date.getHours();
+
     let minutes = "0" + date.getMinutes();
     let seconds = "0" + date.getSeconds();
 
@@ -57,7 +61,7 @@ const parseUnixTime = (time) => {
         seconds = seconds.substring(1, 4);
     }
 
-    const fmt = `${hours}:${minutes}:${seconds}`;
+    const fmt = `${day}/${month}/${year} ${hours}:${minutes}:${seconds}`;
     return fmt;
 };
 
